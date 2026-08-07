@@ -1,5 +1,5 @@
 "use strict";
-
+//Selecting elements
 const form = document.getElementById("brasa-points-form");
 
 const fullNameInput = document.getElementById("full-name");
