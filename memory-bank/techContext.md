@@ -76,11 +76,11 @@ The website should:
 - Represent the Brasaland brand.
 - Be responsive.
 - Be accessible.
-- Use reusable UI components.
+- Maintain consistent and reusable interface patterns.
 - Support the Brasa Points business requirements.
 - Be SEO friendly.
 
-Tailwind is the required styling approach described by the company context.
+The current public website uses Tailwind CSS through CDN and vanilla JavaScript.
 
 ## Website Information Architecture
 
@@ -147,3 +147,77 @@ When implementing a feature, consult sources in this order:
 6. implementation code
 
 `CONTEXT.md` remains authoritative for business facts.
+
+## Existing Public Website
+
+The existing public website uses static HTML, Tailwind CSS through CDN and vanilla JavaScript.
+
+Current files:
+
+- `uis/website/index.html`
+- `uis/website/application.html`
+- `uis/website/validation.js`
+
+The website does not currently use a JavaScript package manager or frontend bundler.
+
+For the current milestone, this architecture will be preserved.
+
+The public website contains:
+
+- Corporate Brasaland landing page
+- Responsive navigation
+- Business and location information
+- Brasa Points information
+- Brasa Points registration application
+- Client-side form validation
+
+## Existing Domain Package
+
+A TypeScript domain package already exists under:
+
+`packages/brasaland-domain`
+
+It contains:
+
+- Domain models
+- Restaurant data
+- Validation utilities
+- Transformation utilities
+- Search utilities
+- Collection utilities
+
+Because the current public website runs directly in the browser without a TypeScript build process, it does not directly import the domain package.
+
+Do not introduce a frontend bundler solely to remove this duplication unless explicitly requested.
+
+## Backoffice
+
+The internal application lives under:
+
+`uis/backoffice`
+
+The current implementation uses static HTML and Tailwind CSS through CDN, matching the lightweight approach already used by the public website.
+
+The backoffice:
+
+- Has its own independent layout.
+- Has its own `index.html` entry point.
+- Does not reuse the public website layout.
+- Shows Brasaland-specific operational information.
+- Does not currently require a backend service.
+
+Current business information displayed includes:
+
+- 14 total restaurant locations
+- 10 locations in Colombia
+- 4 locations in Florida
+- Brasa Points information
+- Brasaland Digital priorities
+
+## Backend Decision
+
+No backend service is required for the current milestone.
+
+The information displayed by the initial website and backoffice can be rendered using existing frontend-local data.
+
+A service under `/services` should only be introduced when future functionality requires server-side processing, persistence or APIs.

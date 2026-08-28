@@ -6,7 +6,7 @@ Agent Memory Bank and initial application infrastructure.
 
 ## Current Objective
 
-Prepare the Brasaland monorepo so development agents can work with persistent business context, technical constraints and a repeatable delivery workflow.
+Validate the initial Brasaland agent infrastructure and application layer before delivery.
 
 ## Completed
 
@@ -16,30 +16,32 @@ Prepare the Brasaland monorepo so development agents can work with persistent bu
 - [x] `uis/README.md` reviewed
 - [x] `services/README.md` reviewed
 - [x] Memory bank initialized
+- [x] Repository-wide `AGENTS.md` created
+- [x] Development rule added under `.agents/rules`
+- [x] Reusable pre-delivery agent skill added
+- [x] Existing public website in `uis/website` reviewed and preserved
+- [x] Brasa Points registration application reviewed and preserved
+- [x] Internal backoffice created in `uis/backoffice`
+- [x] Backoffice uses an independent layout
+- [x] Brasaland business information is visible in the backoffice interface
 
 ## In Progress
 
-- [ ] Repository-wide `AGENTS.md`
-- [ ] Development rules under `.agents/rules`
-- [ ] Reusable agent skill
-- [ ] Public website in `uis/website`
-- [ ] Internal backoffice in `uis/backoffice`
+- [ ] Run final application validation
+- [ ] Execute the pre-delivery workflow defined in `AGENTS.md`
+- [ ] Prepare final commit and Pull Request
 
 ## Planned
 
-### Agent Infrastructure
+### Delivery
 
-- Create `AGENTS.md`
-- Add repository development rule
-- Add reusable pre-delivery skill
-
-### Public Website
-
-Create the initial Brasaland corporate website containing business information defined in `CONTEXT.md`.
-
-### Backoffice
-
-Create an independent backoffice interface showing useful Brasaland operational information.
+- Validate the public website
+- Validate the backoffice
+- Run the pre-delivery checks
+- Review the final Git diff
+- Commit the completed milestone
+- Push `feature/agent-memory-bank`
+- Open a Pull Request to `main`
 
 ## Known Business Requirements
 
@@ -66,12 +68,51 @@ Development-agent configuration will use `.agents/`.
 
 The top-level `/agents` and `/skills` folders will remain reserved for future product-level AI functionality.
 
+### 2026-08-28 — Existing Website Reuse
+
+The existing public Brasaland website under `uis/website` will be reused rather than replaced.
+
+The current implementation already provides:
+
+- Brasaland corporate landing page
+- Brasa Points registration experience
+- Responsive navigation
+- Accessibility considerations
+- Client-side form validation
+- Business-specific location data
+
+No new frontend framework or bundler will be introduced during this milestone.
+
+The TypeScript domain package under `packages/brasaland-domain` remains available for reusable business logic in TypeScript-based applications.
+
+The current static website contains some duplicated domain validation logic because it runs directly in the browser without a TypeScript build pipeline.
+
+Unifying this logic may be considered in a future milestone if the frontend adopts a build system.
+
+### 2026-08-28 — Backoffice Foundation
+
+The initial Brasaland backoffice is implemented under:
+
+`uis/backoffice`
+
+The backoffice uses its own layout and does not reuse the public website layout.
+
+The initial dashboard exposes relevant Brasaland information, including:
+
+- Total restaurant locations
+- Distribution between Colombia and Florida
+- Brasa Points information
+- Digital transformation priorities
+
+The current milestone does not require a backend service for this information.
+
 ## Next Steps
 
-1. Define repository agent workflow.
-2. Add development rules.
-3. Add pre-delivery verification skill.
-4. Initialize `uis/website`.
-5. Initialize `uis/backoffice`.
-6. Validate applications.
-7. Update this file before delivery.
+1. Run the applications locally.
+2. Verify the public website renders correctly.
+3. Verify the backoffice renders correctly.
+4. Execute the pre-delivery skill.
+5. Run the workflow defined in `AGENTS.md`.
+6. Review `git status` and `git diff`.
+7. Create the final commit.
+8. Push the branch and open the Pull Request.
