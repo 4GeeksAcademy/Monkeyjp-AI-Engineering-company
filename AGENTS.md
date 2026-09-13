@@ -163,6 +163,26 @@ The backoffice must use its own application layout rather than importing the pub
 
 Business-relevant information must be visible in the interface.
 
+## Talent Pipeline Tracker
+
+Brasaland People & Talent functionality belongs in:
+
+`uis/talent-pipeline-tracker`
+
+The Talent Pipeline Tracker is an independent internal application.
+
+It must maintain its own:
+
+- application structure
+- routing
+- layout
+- dependencies
+- environment configuration
+
+Do not migrate or modify `uis/website` or `uis/backoffice` solely to align them with the Talent Pipeline Tracker technology stack.
+
+The application must consume the Talent Tracker REST API rather than introducing a new Brasaland backend service for candidate management.
+
 ## Backend
 
 Server-side functionality belongs under:

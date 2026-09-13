@@ -17,6 +17,10 @@ Current applications:
 - `/uis/website` — public Brasaland corporate website.
 - `/uis/backoffice` — internal Brasaland operations application.
 
+Planned application:
+
+- `/uis/talent-pipeline-tracker` — internal People & Talent application for managing recruitment candidates and pipeline activity.
+
 These applications must remain independent and maintain their own layout and application entry points.
 
 ### Backend Services
@@ -214,10 +218,109 @@ Current business information displayed includes:
 - Brasa Points information
 - Brasaland Digital priorities
 
-## Backend Decision
+## Talent Pipeline Tracker
 
-No backend service is required for the current milestone.
+The People & Talent application lives under:
 
-The information displayed by the initial website and backoffice can be rendered using existing frontend-local data.
+`uis/talent-pipeline-tracker`
 
-A service under `/services` should only be introduced when future functionality requires server-side processing, persistence or APIs.
+It is an independent frontend application and must not be merged into either the public website or the backoffice.
+
+### Technology Stack
+
+The Talent Pipeline Tracker uses:
+
+- Next.js
+- React
+- TypeScript
+- App Router
+- Tailwind CSS
+- ESLint
+
+The application maintains its own:
+
+- `package.json`
+- application entry point
+- routing
+- layout
+- environment configuration
+- frontend dependencies
+
+### API Integration
+
+The application consumes the external Talent Tracker REST API:
+
+`https://playground.4geeks.com/tracker/api/v1`
+
+The API base URL must be configured through:
+
+`NEXT_PUBLIC_API_URL`
+
+Local development configuration belongs in:
+
+`.env.local`
+
+A safe configuration template should be committed as:
+
+`.env.example`
+
+All API communication must be asynchronous.
+
+The user interface must explicitly communicate:
+
+- loading states
+- mutation success
+- API errors
+
+Failures must not occur silently.
+
+### Functional Scope
+
+The Talent Pipeline Tracker must support:
+
+- Listing all candidate applications.
+- Displaying candidate name, position, current status and current stage.
+- Searching candidates by name or email without reloading the page.
+- Filtering candidates by status.
+- Filtering candidates by stage.
+- Keeping status and stage filters in URL query parameters.
+- Opening a candidate detail view.
+- Updating candidate status.
+- Updating candidate stage.
+- Adding internal notes.
+- Deleting internal notes.
+- Creating new candidate applications.
+- Editing existing candidate applications.
+
+### State Management Direction
+
+Use React component state and framework hooks unless shared state becomes genuinely necessary.
+
+Do not introduce global state libraries solely for this milestone.
+
+Status and stage filters should be represented in the URL query string so navigation and filtering state can be preserved.
+
+Search input may remain local component state.
+
+### Separation from Existing Interfaces
+
+The Talent Pipeline Tracker is separate from:
+
+- `uis/website`
+- `uis/backoffice`
+
+The public website remains a static HTML/Tailwind/JavaScript application.
+
+The backoffice remains an independent internal interface.
+
+The Talent Pipeline Tracker introduces Next.js only within its own application directory and does not require migrating existing interfaces.
+
+## Backend and API Decision
+
+No Brasaland-owned backend service needs to be created for the Talent Pipeline Tracker.
+
+The application consumes the externally provided Talent Tracker REST API.
+
+The existing public website and backoffice may continue using frontend-local data where appropriate.
+
+A new service under `/services` should only be introduced when future functionality specifically requires Brasaland-owned server-side processing, persistence or APIs.

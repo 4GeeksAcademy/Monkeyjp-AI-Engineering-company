@@ -13,10 +13,11 @@ This rule applies to frontend application files under:
 
 `uis/**`
 
-It governs both:
+It governs:
 
 - `uis/website`
 - `uis/backoffice`
+- `uis/talent-pipeline-tracker`
 
 ## Business Alignment
 
@@ -31,7 +32,7 @@ Do not invent:
 - operating countries
 - business capabilities
 
-When business data is needed, retrieve it from `CONTEXT.md` or an existing centralized application data source.
+When business data is needed, retrieve it from `CONTEXT.md`, an existing centralized application data source, or the API explicitly assigned to the application.
 
 ## Brasaland Terminology
 
@@ -76,6 +77,35 @@ must belong to the internal application.
 The backoffice must maintain its own layout and must not depend on the public website layout.
 
 The entry view must show useful Brasaland business information rather than generic dashboard placeholder text.
+
+## Talent Pipeline Tracker
+
+Files under:
+
+`uis/talent-pipeline-tracker/**`
+
+belong to Brasaland's internal People & Talent application.
+
+The application must remain independent from:
+
+- `uis/website`
+- `uis/backoffice`
+
+It should follow the technology stack required by the milestone and configured within its own application directory.
+
+Candidate and hiring-pipeline data must come from the provided Talent Tracker API.
+
+Do not invent candidate statuses, pipeline stages, field names or API behavior.
+
+Use the API documentation and existing project context as the source of truth.
+
+The interface must clearly communicate:
+
+- loading states
+- API errors
+- successful mutations
+
+Search and filtering interactions should not require a full page reload.
 
 ## Accessibility
 

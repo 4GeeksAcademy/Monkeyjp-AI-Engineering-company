@@ -98,3 +98,39 @@ Online ordering may be implemented in a future milestone.
 The root `CONTEXT.md` file is the authoritative business source for this project.
 
 When business requirements conflict with assumptions made elsewhere in the repository, `CONTEXT.md` takes precedence.
+
+## Internal Applications
+
+Brasaland also develops internal tools to support its corporate teams and day-to-day operations.
+
+These internal applications are independent from the public customer-facing website and should remain separated by responsibility inside the monorepo.
+
+Current internal interfaces include:
+
+- `uis/backoffice` — internal operational interface for Brasaland staff.
+
+The next planned internal interface is:
+
+- `uis/talent-pipeline-tracker` — internal People & Talent application for managing recruitment candidates and the hiring pipeline.
+
+## People & Talent
+
+Brasaland's People & Talent team manages recruitment processes for open positions across the organization.
+
+The Talent Pipeline Tracker is intended to replace fragmented manual workflows such as:
+
+- shared spreadsheets for candidate tracking
+- interview notes stored in separate documents
+- status updates managed through email threads
+
+The application must give the People & Talent team a single place to:
+
+- review all candidate applications
+- search and filter candidates
+- understand each candidate's current status and hiring stage
+- update status and stage
+- manage internal notes
+- create new applications
+- correct or edit existing candidate information
+
+The Talent Pipeline Tracker is an internal business application and is not part of Brasaland's public customer experience.
