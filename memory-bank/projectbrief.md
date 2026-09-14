@@ -109,7 +109,7 @@ Current internal interfaces include:
 
 - `uis/backoffice` — internal operational interface for Brasaland staff.
 
-The next planned internal interface is:
+The current internal People & Talent interface is:
 
 - `uis/talent-pipeline-tracker` — internal People & Talent application for managing recruitment candidates and the hiring pipeline.
 

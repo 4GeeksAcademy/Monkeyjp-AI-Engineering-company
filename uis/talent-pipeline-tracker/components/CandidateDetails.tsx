@@ -94,14 +94,29 @@ export default function CandidateDetails({
   }
 
   if (loading) {
-    return <p>Loading candidate...</p>;
+    return (
+      <div
+        className="flex min-h-[190px] flex-col items-center justify-center gap-[7px] rounded-xl border border-dashed border-[var(--border-strong)] bg-[var(--surface)] p-6 text-center text-[var(--muted)]"
+        role="status"
+      >
+        <strong className="text-[0.95rem] text-[var(--navy)]">
+          Loading candidate
+        </strong>
+        <p className="m-0">Fetching the candidate record.</p>
+      </div>
+    );
   }
 
   if (!candidate) {
     return (
-      <div role="alert">
-        <p>Unable to load candidate.</p>
-        {error && <p>{error}</p>}
+      <div
+        className="flex min-h-[190px] flex-col items-start justify-center gap-[7px] rounded-xl border border-[#efc9cb] bg-[#fff7f7] p-6 text-left text-[var(--danger)]"
+        role="alert"
+      >
+        <strong className="text-[0.95rem] text-[var(--navy)]">
+          Unable to load candidate
+        </strong>
+        {error && <p className="m-0">{error}</p>}
       </div>
     );
   }
@@ -111,40 +126,74 @@ export default function CandidateDetails({
     : `/candidates/${candidate.id}/edit`;
 
   return (
-    <article>
-      <header>
-        <h1>{candidate.full_name}</h1>
-        <p>{candidate.position}</p>
-      </header>
+    <div className="grid gap-5 min-[901px]:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.8fr)]">
+      <article className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_8px_24px_rgba(23,43,58,0.04)] max-[680px]:p-[18px]">
+        <header className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <p className="mb-[9px] text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-[var(--brick)]">
+              Candidate record
+            </p>
+            <h1 className="m-0 text-[clamp(1.7rem,3vw,2.35rem)] font-bold leading-[1.08] tracking-[-0.045em] text-[var(--navy)]">
+              {candidate.full_name}
+            </h1>
+            <p className="mt-2.5 max-w-[620px] text-[0.94rem] leading-[1.55] text-[var(--muted)]">
+              {candidate.position}
+            </p>
+          </div>
+          <Link
+            className="inline-flex min-h-10 items-center justify-center rounded-[7px] border border-[var(--border-strong)] bg-[var(--surface)] px-[15px] text-[0.83rem] font-bold text-[var(--navy)] no-underline hover:bg-[var(--surface-muted)] max-[680px]:shrink-0"
+            href={editUrl}
+          >
+            Edit record
+          </Link>
+        </header>
 
-      <p>
-        <Link href={editUrl}>Edit candidate</Link>
-      </p>
+        {error && (
+          <div
+            className="mb-4 rounded-[7px] bg-[#fff1f1] px-[13px] py-[11px] text-[0.8rem] text-[var(--danger)]"
+            role="alert"
+          >
+            <p>{error}</p>
+          </div>
+        )}
 
-      {error && (
-        <div role="alert">
-          <p>{error}</p>
-        </div>
-      )}
+        {successMessage && (
+          <div
+            className="mb-4 rounded-[7px] bg-[#e7f5ed] px-[13px] py-[11px] text-[0.8rem] text-[var(--success)]"
+            role="status"
+          >
+            <p>{successMessage}</p>
+          </div>
+        )}
 
-      {successMessage && <p role="status">{successMessage}</p>}
+        <dl className="m-0 grid grid-cols-2 max-[1200px]:grid-cols-1">
+          <div className="min-w-0 border-t border-[#edf0f2] py-4 pr-3">
+            <dt className="mb-1.5 text-[0.7rem] font-bold uppercase text-[var(--muted)]">
+              Email
+            </dt>
+            <dd className="m-0 break-words text-[0.88rem] text-[var(--navy)]">
+              {candidate.email}
+            </dd>
+          </div>
 
-      <dl>
-        <div>
-          <dt>Email</dt>
-          <dd>{candidate.email}</dd>
-        </div>
+          <div className="min-w-0 border-t border-[#edf0f2] py-4 pr-3">
+            <dt className="mb-1.5 text-[0.7rem] font-bold uppercase text-[var(--muted)]">
+              Phone
+            </dt>
+            <dd className="m-0 break-words text-[0.88rem] text-[var(--navy)]">
+              {candidate.phone}
+            </dd>
+          </div>
 
-        <div>
-          <dt>Phone</dt>
-          <dd>{candidate.phone}</dd>
-        </div>
-
-        <div>
-          <dt>Status</dt>
-          <dd>
-            <label htmlFor="candidate-status-detail">Candidate status</label>
+          <div className="flex flex-col gap-[7px] border-t border-[#edf0f2] py-4 pr-3">
+            <label
+              className="text-[0.7rem] font-bold uppercase text-[var(--muted)]"
+              htmlFor="candidate-status-detail"
+            >
+              Candidate status
+            </label>
             <select
+              className="min-h-[35px] rounded-md border border-[var(--border-strong)] bg-white px-2 text-[var(--navy)]"
               id="candidate-status-detail"
               value={candidate.status}
               disabled={saving}
@@ -160,14 +209,17 @@ export default function CandidateDetails({
                 </option>
               ))}
             </select>
-          </dd>
-        </div>
+          </div>
 
-        <div>
-          <dt>Stage</dt>
-          <dd>
-            <label htmlFor="candidate-stage-detail">Candidate stage</label>
+          <div className="flex flex-col gap-[7px] border-t border-[#edf0f2] py-4 pr-3">
+            <label
+              className="text-[0.7rem] font-bold uppercase text-[var(--muted)]"
+              htmlFor="candidate-stage-detail"
+            >
+              Candidate stage
+            </label>
             <select
+              className="min-h-[35px] rounded-md border border-[var(--border-strong)] bg-white px-2 text-[var(--navy)]"
               id="candidate-stage-detail"
               value={candidate.stage}
               disabled={saving}
@@ -183,52 +235,85 @@ export default function CandidateDetails({
                 </option>
               ))}
             </select>
-          </dd>
-        </div>
+          </div>
 
-        <div>
-          <dt>Experience</dt>
-          <dd>{candidate.experience_years} years</dd>
-        </div>
+          <div className="border-t border-[#edf0f2] py-4 pr-3">
+            <dt className="mb-1.5 text-[0.7rem] font-bold uppercase text-[var(--muted)]">
+              Experience
+            </dt>
+            <dd className="m-0 text-[0.88rem] text-[var(--navy)]">
+              {candidate.experience_years} years
+            </dd>
+          </div>
 
-        <div>
-          <dt>Applied</dt>
-          <dd>{new Date(candidate.applied_at).toLocaleDateString()}</dd>
-        </div>
+          <div className="border-t border-[#edf0f2] py-4 pr-3">
+            <dt className="mb-1.5 text-[0.7rem] font-bold uppercase text-[var(--muted)]">
+              Applied
+            </dt>
+            <dd className="m-0 text-[0.88rem] text-[var(--navy)]">
+              {new Date(candidate.applied_at).toLocaleDateString()}
+            </dd>
+          </div>
 
-        <div>
-          <dt>Last updated</dt>
-          <dd>{new Date(candidate.updated_at).toLocaleDateString()}</dd>
-        </div>
+          <div className="border-t border-[#edf0f2] py-4 pr-3">
+            <dt className="mb-1.5 text-[0.7rem] font-bold uppercase text-[var(--muted)]">
+              Last updated
+            </dt>
+            <dd className="m-0 text-[0.88rem] text-[var(--navy)]">
+              {new Date(candidate.updated_at).toLocaleDateString()}
+            </dd>
+          </div>
 
-        <div>
-          <dt>Internal notes</dt>
-          <dd>{candidate.notes_count}</dd>
-        </div>
-      </dl>
+          <div className="border-t border-[#edf0f2] py-4 pr-3">
+            <dt className="mb-1.5 text-[0.7rem] font-bold uppercase text-[var(--muted)]">
+              Internal notes
+            </dt>
+            <dd className="m-0 text-[0.88rem] text-[var(--navy)]">
+              {candidate.notes_count}
+            </dd>
+          </div>
+        </dl>
 
-      {candidate.linkedin_url && (
-        <p>
-          <a href={candidate.linkedin_url} target="_blank" rel="noreferrer">
-            View LinkedIn
-          </a>
-        </p>
-      )}
+        {(candidate.linkedin_url || candidate.cv_url) && (
+          <div className="mt-1 flex flex-wrap gap-2.5 border-t border-[#edf0f2] pt-[18px]">
+            {candidate.linkedin_url && (
+              <a
+                className="text-[0.8rem] font-bold text-[var(--brick)]"
+                href={candidate.linkedin_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View LinkedIn profile
+              </a>
+            )}
 
-      {candidate.cv_url && (
-        <p>
-          <a href={candidate.cv_url} target="_blank" rel="noreferrer">
-            View CV
-          </a>
-        </p>
-      )}
+            {candidate.cv_url && (
+              <a
+                className="text-[0.8rem] font-bold text-[var(--brick)]"
+                href={candidate.cv_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View CV
+              </a>
+            )}
+          </div>
+        )}
 
-      {saving && <p>Saving changes...</p>}
+        {saving && (
+          <p
+            className="mt-2.5 max-w-[620px] text-[0.94rem] leading-[1.55] text-[var(--muted)]"
+            role="status"
+          >
+            Saving changes...
+          </p>
+        )}
+      </article>
 
       <CandidateNotes
         candidateId={candidate.id}
         onNotesCountChange={handleNotesCountChange}
       />
-    </article>
+    </div>
   );
 }

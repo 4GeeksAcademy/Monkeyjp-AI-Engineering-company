@@ -21,6 +21,21 @@ import {
 
 const LIMIT = 20;
 
+const statusBadgeClasses: Record<CandidateStatus, string> = {
+  received: "bg-[#edf1f4] text-[#556270]",
+  in_progress: "bg-[#fff2d8] text-[var(--warning)]",
+  selected: "bg-[#e2f4eb] text-[var(--success)]",
+  discarded: "bg-[#fbe8e9] text-[var(--danger)]",
+};
+
+const stageBadgeClasses: Record<CandidateStage, string> = {
+  pending: "bg-[#edf1f4] text-[#556270]",
+  review: "bg-[#fff2d8] text-[var(--warning)]",
+  personal_interview: "bg-[#e8edf8] text-[#3f5f91]",
+  technical_interview: "bg-[#e8edf8] text-[#3f5f91]",
+  offer_presented: "bg-[#e2f4eb] text-[var(--success)]",
+};
+
 export default function CandidateList() {
   const router = useRouter();
   const pathname = usePathname();
@@ -186,7 +201,6 @@ export default function CandidateList() {
 
     router.replace(pathname);
   }
-
   return (
     <section>
       <CandidateFilters
@@ -199,67 +213,124 @@ export default function CandidateList() {
         onClear={clearFilters}
       />
 
-      {loading && <p>Loading candidates...</p>}
+      {loading && (
+        <div
+          className="flex min-h-[190px] flex-col items-center justify-center gap-[7px] rounded-xl border border-dashed border-[var(--border-strong)] bg-[var(--surface)] p-6 text-center text-[var(--muted)]"
+          role="status"
+        >
+          <strong className="text-[0.95rem] text-[var(--navy)]">
+            Loading candidates
+          </strong>
+          <p className="m-0">Fetching the latest applications.</p>
+        </div>
+      )}
 
       {error && (
-        <div role="alert">
-          <p>Unable to load candidates.</p>
-          <p>{error}</p>
+        <div
+          className="flex min-h-[190px] flex-col items-start justify-center gap-[7px] rounded-xl border border-[#efc9cb] bg-[#fff7f7] p-6 text-left text-[var(--danger)]"
+          role="alert"
+        >
+          <strong className="text-[0.95rem] text-[var(--navy)]">
+            Unable to load candidates
+          </strong>
+          <p className="m-0">{error}</p>
         </div>
       )}
 
       {!loading && !error && candidates.length === 0 && (
-        <p>No candidates found.</p>
+        <div className="flex min-h-[190px] flex-col items-center justify-center gap-[7px] rounded-xl border border-dashed border-[var(--border-strong)] bg-[var(--surface)] p-6 text-center text-[var(--muted)]">
+          <strong className="text-[0.95rem] text-[var(--navy)]">
+            No candidates found
+          </strong>
+          <p className="m-0">
+            Try adjusting your search or clearing the active filters.
+          </p>
+        </div>
       )}
 
       {!loading && !error && candidates.length > 0 && (
-        <>
-          <p>
-            {total} candidates found · showing {candidates.length}
+        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_8px_24px_rgba(23,43,58,0.04)]">
+          <p className="m-0 px-5 py-[15px] text-[0.78rem] text-[var(--muted)] max-[680px]:px-4 max-[680px]:py-[13px]">
+            {total} {total === 1 ? "candidate" : "candidates"} found · showing{" "}
+            {candidates.length}
           </p>
+
+          <div
+            className="grid grid-cols-[minmax(220px,1.6fr)_150px_190px] gap-[18px] border-b border-[var(--border)] bg-[#f8f9fa] px-5 py-[15px] text-[0.68rem] font-extrabold uppercase tracking-[0.08em] text-[var(--muted)] max-[900px]:grid-cols-[minmax(0,1fr)_minmax(105px,0.7fr)_minmax(140px,1fr)] max-[900px]:gap-3 max-[900px]:px-4 max-[680px]:hidden"
+            aria-hidden="true"
+          >
+            <span>Candidate</span>
+            <span>Status</span>
+            <span>Hiring stage</span>
+          </div>
 
           <div>
             {candidates.map((candidate) => (
-              <article key={candidate.id}>
-                <h2>
-                  <Link
-                    href={`/candidates/${candidate.id}?from=${encodeURIComponent(
-                      returnUrl,
-                    )}`}
-                  >
-                    {candidate.full_name}
-                  </Link>
-                </h2>
+              <article
+                className="grid min-h-[76px] grid-cols-[minmax(220px,1.6fr)_150px_190px] items-center gap-[18px] border-b border-[#edf0f2] px-5 py-[15px] last:border-b-0 hover:bg-[#fcfcfd] max-[900px]:grid-cols-[minmax(0,1fr)_minmax(105px,0.7fr)_minmax(140px,1fr)] max-[900px]:gap-3 max-[900px]:px-4 max-[900px]:py-[15px] max-[680px]:flex max-[680px]:min-h-0 max-[680px]:flex-wrap max-[680px]:items-start max-[680px]:gap-x-4 max-[680px]:gap-y-2.5 max-[680px]:p-4"
+                key={candidate.id}
+              >
+                <div className="min-w-0 max-[680px]:basis-full">
+                  <h2 className="m-0">
+                    <Link
+                      className="text-[0.92rem] font-bold tracking-[-0.01em] text-[var(--navy)] no-underline hover:text-[var(--brick)]"
+                      href={`/candidates/${candidate.id}?from=${encodeURIComponent(
+                        returnUrl,
+                      )}`}
+                    >
+                      {candidate.full_name}
+                    </Link>
+                  </h2>
+                  <p className="m-0 mt-1 text-[0.82rem] leading-[1.4] text-[var(--muted)]">
+                    {candidate.position}
+                  </p>
+                </div>
 
-                <p>{candidate.position}</p>
-                <p>Status: {candidateStatusLabels[candidate.status]}</p>
-                <p>Stage: {candidateStageLabels[candidate.stage]}</p>
+                <div>
+                  <span
+                    className={`inline-flex max-w-full rounded-full px-[9px] py-[7px] text-[0.7rem] font-bold leading-none whitespace-nowrap ${statusBadgeClasses[candidate.status]} max-[900px]:whitespace-normal max-[900px]:leading-[1.25]`}
+                  >
+                    {candidateStatusLabels[candidate.status]}
+                  </span>
+                </div>
+                <div>
+                  <span
+                    className={`inline-flex max-w-full rounded-full px-[9px] py-[7px] text-[0.7rem] font-bold leading-none whitespace-nowrap ${stageBadgeClasses[candidate.stage]} max-[900px]:whitespace-normal max-[900px]:leading-[1.25]`}
+                  >
+                    {candidateStageLabels[candidate.stage]}
+                  </span>
+                </div>
               </article>
             ))}
           </div>
 
-          <nav aria-label="Candidate pagination">
-            <button
-              type="button"
-              disabled={page <= 1 || loading}
-              onClick={() => updatePage(page - 1)}
-            >
-              Previous
-            </button>
-
-            <span>
+          <nav
+            className="flex items-center justify-between px-5 py-[18px] max-[680px]:flex-col max-[680px]:items-start max-[680px]:gap-[13px] max-[680px]:p-4"
+            aria-label="Candidate pagination"
+          >
+            <p className="m-0 text-[0.78rem] text-[var(--muted)]">
               Page {page} of {totalPages}
-            </span>
-
-            <button
-              type="button"
-              disabled={page >= totalPages || loading}
-              onClick={() => updatePage(page + 1)}
-            >
-              Next
-            </button>
+            </p>
+            <div className="flex gap-2 max-[680px]:w-full">
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-[7px] border border-[var(--border-strong)] bg-[var(--surface)] px-[15px] text-[0.83rem] font-bold text-[var(--navy)] hover:bg-[var(--surface-muted)] max-[680px]:flex-1"
+                type="button"
+                disabled={page <= 1 || loading}
+                onClick={() => updatePage(page - 1)}
+              >
+                Previous
+              </button>
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-[7px] border border-[var(--border-strong)] bg-[var(--surface)] px-[15px] text-[0.83rem] font-bold text-[var(--navy)] hover:bg-[var(--surface-muted)] max-[680px]:flex-1"
+                type="button"
+                disabled={page >= totalPages || loading}
+                onClick={() => updatePage(page + 1)}
+              >
+                Next
+              </button>
+            </div>
           </nav>
-        </>
+        </div>
       )}
     </section>
   );

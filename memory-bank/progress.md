@@ -6,11 +6,11 @@ Milestone 3 — Talent Pipeline Tracker
 
 ## Current Objective
 
-Build Brasaland's internal Talent Pipeline Tracker as a new Next.js application under:
+Maintain Brasaland's internal Talent Pipeline Tracker under:
 
 `uis/talent-pipeline-tracker`
 
-The application will consume the provided Talent Tracker REST API and allow the People & Talent team to manage candidates, filters, pipeline stages, statuses and internal notes.
+The application consumes the provided Talent Tracker REST API and allows the People & Talent team to manage candidates, filters, pipeline stages, statuses and internal notes.
 
 ## Completed
 
@@ -46,49 +46,34 @@ The application will consume the provided Talent Tracker REST API and allow the 
 - Added supporting agent and skill infrastructure.
 - Merged the Agent Memory Bank work into `main`.
 
-## In Progress
-
 ### Milestone 3 — Talent Pipeline Tracker
 
-Preparing the repository and project context before implementation.
+- Implemented the Next.js 16 application under `uis/talent-pipeline-tracker` with TypeScript, App Router, Tailwind CSS and ESLint.
+- Integrated the external Talent Tracker REST API through the centralized service layer.
+- Implemented the candidate list with URL filters for status, stage and page.
+- Added local debounced search by candidate name or email.
+- Added API pagination with 20 candidates per page and invalid-page normalization.
+- Implemented candidate detail views with status and stage PATCH updates.
+- Implemented internal notes CRUD and synchronized notes counts.
+- Implemented create and edit candidate flows using the shared form.
+- Preserved filtered and paginated list context through detail and edit navigation.
+- Added safe internal return URL handling.
+- Added the responsive internal Brasaland People & Talent UI.
+- Migrated component presentation styling to Tailwind utilities while retaining global design tokens and accessibility foundations.
+- Added readable status/stage badges, responsive tablet behavior, visible focus states and reduced-motion support.
+- Fixed the `experience_years` form UX so the field can be empty while editing and submits a validated number.
+- Confirmed TypeScript, lint and production build validation pass.
 
-Current work:
+## Known Issues
 
-- Validate and update the Memory Bank.
-- Review the Talent Tracker API contract.
-- Create the new Next.js application under `uis/talent-pipeline-tracker`.
-
-## Planned
-
-### Talent Pipeline Tracker
-
-- Initialize Next.js with TypeScript, App Router, Tailwind CSS and ESLint.
-- Configure `NEXT_PUBLIC_API_URL`.
-- Define candidate and note API types.
-- Implement the API service layer.
-- Display all applications.
-- Search candidates by name or email without reloading the page.
-- Filter applications by status.
-- Filter applications by stage.
-- Persist status and stage filters in URL query parameters.
-- Open candidate detail views without losing list context.
-- Update candidate status and stage.
-- Add internal notes.
-- Delete internal notes.
-- Create new applications.
-- Edit existing applications.
-- Implement loading states.
-- Implement clear error states.
-- Provide success feedback for mutations.
-- Run lint and production build validation.
+- A browser console Web Vitals-related error is still under investigation.
+- The error does not currently point to application business logic.
+- It occurs during some client-side navigations and will be investigated separately.
 
 ## Next Steps
 
-1. Finish synchronizing the Memory Bank with the current repository state.
-2. Review the Talent Tracker REST API documentation.
-3. Create `uis/talent-pipeline-tracker`.
-4. Initialize the Next.js application.
-5. Begin implementation with API types and service functions.
+1. Investigate the browser console Web Vitals-related error during client-side navigation.
+2. Continue maintenance and focused UX improvements for the Talent Pipeline Tracker.
 
 ## Notes
 
@@ -125,12 +110,16 @@ The Brasaland backoffice under `uis/backoffice` maintains its own layout and rem
 
 ### 2026-09-13 — Talent Pipeline Tracker
 
-The Talent Pipeline Tracker will be implemented as a separate application under:
+The Talent Pipeline Tracker was implemented as a separate application under:
 
 `uis/talent-pipeline-tracker`
 
-It will use Next.js, React and TypeScript as required by Milestone 3.
+It uses Next.js, React and TypeScript as required by Milestone 3.
 
 Existing Brasaland interfaces will not be migrated to Next.js solely to align technology stacks.
 
-The application will consume the externally provided Talent Tracker REST API rather than introducing a Brasaland-owned backend service for candidate management.
+The application consumes the externally provided Talent Tracker REST API rather than introducing a Brasaland-owned backend service for candidate management.
+
+### 2026-09-14 — Talent Pipeline Tracker Completion
+
+Completed the core candidate management workflows, responsive People & Talent UI, Tailwind component styling, accessibility improvements, and form UX refinements. TypeScript, lint and production build checks pass. A browser console Web Vitals-related error remains under separate investigation.

@@ -17,7 +17,7 @@ Current applications:
 - `/uis/website` — public Brasaland corporate website.
 - `/uis/backoffice` — internal Brasaland operations application.
 
-Planned application:
+Current application:
 
 - `/uis/talent-pipeline-tracker` — internal People & Talent application for managing recruitment candidates and pipeline activity.
 

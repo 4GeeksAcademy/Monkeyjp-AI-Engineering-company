@@ -105,13 +105,28 @@ export default function CandidateNotes({
   }
 
   return (
-    <section>
-      <h2>Internal notes</h2>
+    <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_8px_24px_rgba(23,43,58,0.04)] max-[680px]:p-[18px]">
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="m-0 text-[1.05rem] tracking-[-0.02em] text-[var(--navy)]">
+            Internal notes
+          </h2>
+          <p className="mt-[5px] text-[0.8rem] leading-[1.5] text-[var(--muted)]">
+            Keep interview context and hiring decisions close to the record.
+          </p>
+        </div>
+      </header>
 
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="candidate-note">Add note</label>
+      <form className="flex flex-col gap-2.5" onSubmit={handleSubmit}>
+        <label
+          className="text-[0.75rem] font-bold text-[var(--navy)]"
+          htmlFor="candidate-note"
+        >
+          Add a note
+        </label>
 
         <textarea
+          className="min-h-[105px] w-full resize-y rounded-[7px] border border-[var(--border-strong)] bg-white p-[11px] text-[var(--foreground)] placeholder:text-[#8b96a2]"
           id="candidate-note"
           value={content}
           onChange={(event) => setContent(event.target.value)}
@@ -120,38 +135,78 @@ export default function CandidateNotes({
           required
         />
 
-        <button type="submit" disabled={saving}>
+        <button
+          className="inline-flex min-h-10 self-start items-center justify-center rounded-[7px] border border-[var(--brick)] bg-[var(--brick)] px-[15px] text-[0.83rem] font-bold text-white hover:border-[var(--brick-dark)] hover:bg-[var(--brick-dark)]"
+          type="submit"
+          disabled={saving}
+        >
           {saving ? "Adding note..." : "Add note"}
         </button>
       </form>
 
       {error && (
-        <div role="alert">
-          <p>{error}</p>
+        <div
+          className="mb-4 rounded-[7px] bg-[#fff1f1] px-[13px] py-[11px] text-[0.8rem] text-[var(--danger)]"
+          role="alert"
+        >
+          <p className="m-0">{error}</p>
         </div>
       )}
 
-      {successMessage && <p role="status">{successMessage}</p>}
+      {successMessage && (
+        <div
+          className="mb-4 rounded-[7px] bg-[#e7f5ed] px-[13px] py-[11px] text-[0.8rem] text-[var(--success)]"
+          role="status"
+        >
+          <p className="m-0">{successMessage}</p>
+        </div>
+      )}
 
-      {loading && <p>Loading notes...</p>}
+      {loading && (
+        <div
+          className="mt-6 flex min-h-[120px] flex-col items-center justify-center gap-[7px] rounded-xl border border-dashed border-[var(--border-strong)] bg-[var(--surface)] p-6 text-center text-[var(--muted)]"
+          role="status"
+        >
+          <strong className="text-[0.95rem] text-[var(--navy)]">
+            Loading notes
+          </strong>
+        </div>
+      )}
 
-      {!loading && notes.length === 0 && <p>No internal notes yet.</p>}
+      {!loading && notes.length === 0 && (
+        <div className="mt-6 flex min-h-[120px] flex-col items-center justify-center gap-[7px] rounded-xl border border-dashed border-[var(--border-strong)] bg-[var(--surface)] p-6 text-center text-[var(--muted)]">
+          <strong className="text-[0.95rem] text-[var(--navy)]">
+            No internal notes yet
+          </strong>
+          <p className="m-0">Add the first note for this candidate.</p>
+        </div>
+      )}
 
       {!loading && notes.length > 0 && (
-        <div>
+        <div className="mt-6 flex flex-col gap-2.5">
           {notes.map((note) => (
-            <article key={note.id}>
-              <p>{note.content}</p>
+            <article
+              className="rounded-lg border border-[var(--border)] bg-[#fafbfc] p-[13px]"
+              key={note.id}
+            >
+              <p className="m-0 whitespace-pre-wrap text-[0.82rem] leading-[1.55] text-[var(--navy)]">
+                {note.content}
+              </p>
 
-              <p>{new Date(note.created_at).toLocaleString()}</p>
+              <div className="mt-3 flex items-center justify-between">
+                <p className="m-0 text-[0.7rem] text-[var(--muted)]">
+                  {new Date(note.created_at).toLocaleString()}
+                </p>
 
-              <button
-                type="button"
-                disabled={deletingId === note.id}
-                onClick={() => handleDelete(note.id)}
-              >
-                {deletingId === note.id ? "Deleting..." : "Delete note"}
-              </button>
+                <button
+                  className="inline-flex min-h-8 items-center justify-center rounded-[7px] border border-transparent bg-transparent px-2 text-[0.75rem] font-bold text-[var(--muted)] hover:border-[#aeb8c2] hover:bg-[var(--surface-muted)]"
+                  type="button"
+                  disabled={deletingId === note.id}
+                  onClick={() => handleDelete(note.id)}
+                >
+                  {deletingId === note.id ? "Deleting..." : "Delete note"}
+                </button>
+              </div>
             </article>
           ))}
         </div>
