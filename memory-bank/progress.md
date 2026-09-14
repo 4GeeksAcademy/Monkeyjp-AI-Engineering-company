@@ -2,19 +2,23 @@
 
 ## Current Milestone
 
-Milestone 3 — Talent Pipeline Tracker
+Milestone 5 — Backend Architecture Proposal
 
 ## Current Objective
 
-Maintain Brasaland's internal Talent Pipeline Tracker under:
-
-`uis/talent-pipeline-tracker`
-
-The application consumes the provided Talent Tracker REST API and allows the People & Talent team to manage candidates, filters, pipeline stages, statuses and internal notes.
+Document the proposed architecture for Brasaland's centralized FastAPI backend in `docs/ARCHITECTURE_PROPOSAL.md`, defining its architectural pattern, domain boundaries, module organization, frontend/backend communication, and key technical risks.
 
 ## Completed
 
-### Milestone 1 — Web Fundamentals
+### Milestone 1 — Project Foundation & AI Context
+
+- Added root `AGENTS.md`.
+- Added persistent memory bank (`projectbrief.md`, `techContext.md`, `progress.md`).
+- Added repository agent rules under `.agents/rules/`.
+- Added supporting agent and skill infrastructure.
+- Configured company context and guidelines for AI engineering workflows.
+
+### Milestone 2 — Brasaland Corporate Website
 
 - Built the Brasaland public website under `uis/website`.
 - Created `index.html`.
@@ -24,29 +28,18 @@ The application consumes the provided Talent Tracker REST API and allows the Peo
 - Added Brasaland business and location information.
 - Implemented Brasa Points registration requirements and age validation.
 
-### Milestone 2 — Programming and TypeScript
+### Milestone 3 — Domain Models & TypeScript Utilities
 
 - Created the Brasaland domain package under `packages/brasaland-domain`.
-- Defined TypeScript interfaces and domain models.
-- Added restaurant/location domain data.
+- Defined TypeScript interfaces and domain models (`models.ts`).
+- Added restaurant and location domain data.
 - Implemented validation utilities.
-- Implemented collection filtering.
-- Implemented sorting utilities.
-- Implemented data transformations.
-- Implemented linear search.
-- Implemented binary search.
+- Implemented collection filtering and transformations.
+- Implemented sorting and search utilities (linear and binary search).
 - Added collection and business utility functions.
 - Verified the package with TypeScript checks and demo execution.
 
-### Agent Infrastructure
-
-- Added root `AGENTS.md`.
-- Added `memory-bank/`.
-- Added repository agent rules under `.agents/rules/`.
-- Added supporting agent and skill infrastructure.
-- Merged the Agent Memory Bank work into `main`.
-
-### Milestone 3 — Talent Pipeline Tracker
+### Milestone 4 — Talent Pipeline Tracker
 
 - Implemented the Next.js 16 application under `uis/talent-pipeline-tracker` with TypeScript, App Router, Tailwind CSS and ESLint.
 - Integrated the external Talent Tracker REST API through the centralized service layer.
@@ -63,6 +56,16 @@ The application consumes the provided Talent Tracker REST API and allows the Peo
 - Added readable status/stage badges, responsive tablet behavior, visible focus states and reduced-motion support.
 - Fixed the `experience_years` form UX so the field can be empty while editing and submits a validated number.
 - Confirmed TypeScript, lint and production build validation pass.
+
+### Milestone 5 — Backend Architecture Proposal
+
+- Created the technical proposal under `docs/ARCHITECTURE_PROPOSAL.md`.
+- Evaluated architectural patterns and selected a Layered Modular Monolith on FastAPI.
+- Defined initial business domains: `locations`, `loyalty` (Brasa Points), and `talent`.
+- Identified transversal capabilities: configuration via environment variables, CORS policies, and `/health`.
+- Documented frontend/backend decoupling via HTTP/JSON.
+- Analyzed technical risks (fat routers, cross-domain coupling, validation drift, CORS configuration, data privacy).
+- Documented references to official FastAPI and Pydantic best practices.
 
 ## Known Issues
 
@@ -127,3 +130,7 @@ The application consumes the externally provided Talent Tracker REST API rather 
 ### 2026-09-14 — Talent Pipeline Tracker Completion
 
 Completed the core candidate management workflows, responsive People & Talent UI, Tailwind component styling, accessibility improvements, and form UX refinements. TypeScript, lint and production build checks pass. A browser console Web Vitals-related error remains under separate investigation.
+
+### 2026-09-14 — Backend Architecture Proposal
+
+Created the technical proposal for Brasaland's centralized backend under `docs/ARCHITECTURE_PROPOSAL.md`. Selected a Layered Modular Monolith pattern implemented in FastAPI, defining initial business domains (`locations`, `loyalty`, `talent`), transversal core capabilities, separated transport/service/repository layers, and decoupled frontend-backend communication via HTTP/JSON with CORS policies.
