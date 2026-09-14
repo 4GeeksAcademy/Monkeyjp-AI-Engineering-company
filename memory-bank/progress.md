@@ -66,9 +66,13 @@ The application consumes the provided Talent Tracker REST API and allows the Peo
 
 ## Known Issues
 
-- A browser console Web Vitals-related error is still under investigation.
-- The error does not currently point to application business logic.
-- It occurs during some client-side navigations and will be investigated separately.
+- A browser console Web Vitals `reportAllChanges` / `startTime` TypeError may occur intermittently during client-side navigation.
+
+- The issue was reproduced on Next.js 16.3.3 and 16.3.5, including production builds using `next start`.
+
+- There is no application-level `useReportWebVitals` integration and no Sentry integration.
+
+- The Talent Pipeline Tracker continues to function correctly, and the issue currently appears external to the application business logic.
 
 ## Next Steps
 
