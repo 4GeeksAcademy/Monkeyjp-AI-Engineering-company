@@ -1,106 +1,106 @@
-# Propuesta de Arquitectura Backend — Brasaland
+# Backend Architecture Proposal — Brasaland
 
-Este documento establece la propuesta técnica y arquitectónica para el diseño del backend centralizado de **Brasaland** antes de comenzar su implementación con FastAPI. Todas las decisiones están fundamentadas en los requerimientos de negocio de [CONTEXT.md](CONTEXT.md), la estructura del monorepo y los sistemas desarrollados en los hitos previos.
+This document establishes the technical and architectural proposal for the design of the centralized backend for **Brasaland** before beginning its implementation with FastAPI. All decisions are based on the business requirements in [CONTEXT.md](CONTEXT.md), the structure of the monorepo, and the systems developed in previous milestones.
 
 ---
 
-## 1. Contexto y Objetivos
+## 1. Context and Goals
 
-### 1.1. Contexto de Negocio
+### 1.1. Business Context
 
-Brasaland es una cadena de restaurantes de comida a la parrilla fundada en 2008 en Medellín, Colombia. Actualmente opera 14 restaurantes propios distribuidos en dos países: 10 en Colombia (Medellín, Bogotá y Cali) y 4 en Estados Unidos (Miami y Orlando, Florida), con un equipo de aproximadamente 115 colaboradores.
+Brasaland is a grilled food restaurant chain founded in 2008 in Medellín, Colombia. It currently operates 14 company-owned restaurants across two countries: 10 in Colombia (Medellín, Bogotá, and Cali) and 4 in the United States (Miami and Orlando, Florida), with a team of approximately 115 employees.
 
-A través del equipo interno **Brasaland Digital**, la compañía avanza en su transformación digital para superar las limitaciones de su presencia web histórica y dotar a la organización de herramientas operativas escalables.
+Through the internal team **Brasaland Digital**, the company is advancing its digital transformation to overcome the limitations of its legacy web presence and provide the organization with scalable operational tools.
 
-### 1.2. Sistemas Actuales y Necesidades de Integración
+### 1.2. Current Systems and Integration Needs
 
-El monorepo cuenta actualmente con las siguientes aplicaciones y paquetes:
+The monorepo currently contains the following applications and packages:
 
-1. **Website Público ([uis/website](uis/website)):**
-   - Landing page corporativa que presenta la marca, historia y sedes en ambos países.
-   - Formulario de registro para el programa de fidelización digital **Brasa Points**.
-   - _Situación actual:_ El formulario realiza validaciones en el navegador y simula el envío del registro en cliente. Requiere una API centralizada para persistir los registros de clientes, validar reglas de negocio en servidor y servir la información oficial y actualizada de las 14 sedes.
+1. **Public Website ([uis/website](uis/website)):**
+   - Corporate landing page presenting the brand, history, and locations across both countries.
+   - Registration form for the **Brasa Points** digital loyalty program.
+   - _Current situation:_ The form performs client-side validation in the browser and simulates registration submission on the client. It requires a centralized API to persist customer registrations, validate business rules on the server, and serve official, up-to-date information for the 14 locations.
 
-2. **Backoffice Operacional ([uis/backoffice](uis/backoffice)):**
-   - Interfaz web interna para la gestión operativa y consulta de indicadores de sedes y prioridades de transformación digital.
-   - _Situación actual:_ Presenta datos estáticos en el cliente. Requiere consumir un backend unificado para consultar métricas, estado de sedes y registros del programa de lealtad.
+2. **Operational Backoffice ([uis/backoffice](uis/backoffice)):**
+   - Internal web interface for operational management and reviewing indicators for locations and digital transformation priorities.
+   - _Current situation:_ Displays static data on the client. It requires consuming a unified backend to query metrics, location statuses, and loyalty program registrations.
 
 3. **Talent Pipeline Tracker ([uis/talent-pipeline-tracker](uis/talent-pipeline-tracker)):**
-   - Aplicación interna desarrollada en Next.js para el equipo de People & Talent, destinada a la gestión del pipeline de selección de candidatos y notas internas.
-   - _Situación actual:_ Consume una API REST externa asignada para su hito. Una API propia centralizada de Brasaland podría asumir en el futuro la persistencia y gestión de los procesos de selección de la compañía si se decide unificar dicha infraestructura.
+   - Internal application built in Next.js for the People & Talent team to manage candidate hiring pipelines and internal notes.
+   - _Current situation:_ Consumes an external REST API assigned for its milestone. A Brasaland-owned centralized API could assume persistence and management for company recruitment processes in the future if the decision is made to unify that infrastructure.
 
-4. **Paquete de Dominio ([packages/brasaland-domain](packages/brasaland-domain)):**
-   - Librería compartida en TypeScript con modelos, validaciones y datos de referencia de restaurantes. Aunque el backend en Python implementará sus propios esquemas y validaciones, este paquete sirve como referencia de consistencia semántica en todo el proyecto.
+4. **Domain Package ([packages/brasaland-domain](packages/brasaland-domain)):**
+   - Shared TypeScript library containing domain models, validations, and reference restaurant data. Although the Python backend will implement its own schemas and validations, this package serves as a reference for semantic consistency across the project.
 
-### 1.3. Problemas que Resuelve una API Centralizada
+### 1.3. Problems Solved by a Centralized API
 
-- **Punto único de verdad:** Elimina la duplicación y dispersión de datos maestros (sedes, reglas de acumulación de puntos, datos de contacto).
-- **Persistencia y procesamiento real:** Permite recibir y almacenar registros reales de Brasa Points, sustituyendo las simulaciones locales en JavaScript.
-- **Seguridad y validación autoritativa:** Garantiza que las reglas críticas (como la mayoría de edad para Brasa Points o formatos telefónicos internacionales) se apliquen de forma estricta en el servidor, sin depender exclusivamente de las validaciones en el cliente.
-- **Base para futuras capacidades:** Prepara a Brasaland para incorporar funcionalidades planificadas como pedidos online (_orders_) y menús dinámicos sin rehacer la arquitectura.
-
----
-
-## 2. Patrón Arquitectónico Propuesto
-
-### 2.1. Evaluación de Opciones
-
-| Patrón                        | Descripción                                                                                                                   | Evaluación para Brasaland                                                                                                                                                                                                                   |
-| :---------------------------- | :---------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **MVC Tradicional**           | Modelo-Vista-Controlador acoplado                                                                                             | No aplica directamente a un backend desacoplado que solo expone una API REST JSON para interfaces SPA o estáticas independientes.                                                                                                           |
-| **Microservicios**            | Servicios independientes por dominio, con bases de datos y despliegues separados                                              | **Desaconsejado.** Para una empresa con 14 ubicaciones y un equipo de desarrollo ágil, introducir microservicios de forma prematura generaría sobrecostes de red, complejidad de coordinación, latencia innecesaria y sobrecarga operativa. |
-| **Serverless (Funciones)**    | Ejecución de funciones efímeras por evento                                                                                    | Puede dificultar la consistencia de modelos compartidos, pruebas de integración y la mantenibilidad de la lógica de dominio en el monorepo.                                                                                                 |
-| **Monolito Modular en Capas** | Una sola aplicación backend organizada internamente por módulos de dominio cohesivos y separación en capas de responsabilidad | **Seleccionado.** Mantiene la simplicidad de desarrollo y despliegue de una sola base de código mientras garantiza límites claros entre dominios.                                                                                           |
-
-### 2.2. Justificación de la Elección
-
-Se propone una arquitectura de **Monolito Modular en Capas (Layered Modular Monolith)** implementada en **FastAPI**.
-
-Esta decisión se alinea estrictamente con las directrices del repositorio en [services/README.md](services/README.md) y el [README.md](README.md) raíz:
-
-1. **Escala adecuada:** Brasaland necesita una solución robusta y mantenible, sin la fricción de arquitecturas distribuidas complejas.
-2. **Encaje en el monorepo:** Permite alojar el backend bajo una carpeta de servicio clara (por ejemplo `services/api/`), interactuando limpiamente con las interfaces de [uis/](uis/).
-3. **Mantenibilidad y evolución:** Al aislar cada dominio de negocio (sedes, lealtad, talento) en su propio módulo con capas diferenciadas (router, servicio, esquema, repositorio), el sistema puede crecer ordenadamente. Si en el futuro un dominio experimentara una demanda masiva, su separación modular facilitaría su extracción a un servicio independiente sin necesidad de reescribir la lógica de negocio.
+- **Single source of truth:** Eliminates duplication and fragmentation of master data (locations, points accrual rules, contact details).
+- **Real persistence and processing:** Enables receiving and storing real Brasa Points registrations, replacing local JavaScript simulations.
+- **Security and authoritative validation:** Ensures critical rules (such as age verification for Brasa Points or international phone formats) are enforced strictly on the server, without relying solely on client-side validations.
+- **Foundation for future capabilities:** Prepares Brasaland to incorporate planned features such as online ordering (_orders_) and dynamic menus without redesigning the architecture.
 
 ---
 
-## 3. Estructura Propuesta del Backend
+## 2. Proposed Architectural Pattern
 
-Para estructurar la aplicación backend dentro de la carpeta [services/](services/), se propone como convención organizarla bajo un directorio como `services/api/`.
+### 2.1. Evaluation of Options
 
-### 3.1. Árbol de Directorios Propuesto (Conceptual)
+| Pattern                      | Description                                                                                                            | Evaluation for Brasaland                                                                                                                                                                                                          |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Traditional MVC**          | Coupled Model-View-Controller                                                                                          | Does not directly fit a decoupled backend that only exposes a JSON REST API for independent SPA or static frontend interfaces.                                                                                                    |
+| **Microservices**            | Independent services per domain, with separate databases and deployments                                               | **Not recommended.** For a company with 14 locations and an agile development team, introducing microservices prematurely would introduce network overhead, coordination complexity, unnecessary latency, and operational burden. |
+| **Serverless (Functions)**   | Ephemeral execution of functions per event                                                                             | Can hinder shared model consistency, integration testing, and maintainability of domain logic within the monorepo.                                                                                                                |
+| **Layered Modular Monolith** | A single backend application organized internally into cohesive domain modules with separated layers of responsibility | **Selected.** Preserves development and deployment simplicity of a single codebase while guaranteeing clear boundaries between domains.                                                                                           |
+
+### 2.2. Justification of the Choice
+
+A **Layered Modular Monolith** architecture implemented in **FastAPI** is proposed.
+
+This decision aligns strictly with repository guidelines in [services/README.md](services/README.md) and the root [README.md](README.md):
+
+1. **Appropriate scale:** Brasaland needs a robust and maintainable solution without the friction of complex distributed architectures.
+2. **Monorepo fit:** Allows hosting the backend under a clean service directory (for example `services/api/`), interacting cleanly with interfaces under [uis/](uis/).
+3. **Maintainability and evolution:** By isolating each business domain (locations, loyalty, talent) in its own module with distinct layers (router, service, schema, repository), the system can grow cleanly. If a domain experiences massive demand in the future, its modular separation simplifies extracting it into an independent service without rewriting business logic.
+
+---
+
+## 3. Proposed Backend Structure
+
+To structure the backend application inside the [services/](services/) directory, organizing it under a directory such as `services/api/` is proposed as a naming convention.
+
+### 3.1. Proposed Directory Tree (Conceptual)
 
 ```text
 services/
-└── api/                              # Nombre propuesto para el servicio de API centralizada
-    ├── README.md                     # Documentación técnica y guía de ejecución
-    ├── requirements.txt              # Dependencias del backend (FastAPI, Uvicorn, etc.)
+└── api/                              # Proposed name for the centralized API service
+    ├── README.md                     # Technical documentation and run instructions
+    ├── requirements.txt              # Backend dependencies (FastAPI, Uvicorn, etc.)
     └── app/
         ├── __init__.py
-        ├── main.py                   # Instanciación de FastAPI, configuración de CORS y registro de routers
-        ├── core/                     # Capacidades transversales y de infraestructura
+        ├── main.py                   # FastAPI instantiation, CORS setup, and router registration
+        ├── core/                     # Transversal capabilities and infrastructure
         │   ├── __init__.py
-        │   ├── config.py             # Carga y gestión centralizada de variables de entorno
-        │   └── security.py           # Utilidades de seguridad / headers (futuro)
-        ├── db/                       # Configuración de base de datos y sesiones
+        │   ├── config.py             # Centralized environment variable management
+        │   └── security.py           # Security utilities / headers (future)
+        ├── db/                       # Database configuration and sessions
         │   ├── __init__.py
         │   └── session.py
-        └── domains/                  # Módulos organizados por dominio de negocio
-            ├── locations/            # Dominio de Sedes / Restaurantes
+        └── domains/                  # Modules organized by business domain
+            ├── locations/            # Locations / Restaurants domain
             │   ├── __init__.py
-            │   ├── router.py         # Endpoints FastAPI (APIRouter)
-            │   ├── schemas.py        # Modelos Pydantic (Request / Response)
-            │   ├── service.py        # Lógica y reglas de negocio del dominio
-            │   ├── models.py         # Modelos de persistencia / ORM
-            │   └── repository.py     # Acceso a datos y consultas
-            ├── loyalty/              # Dominio de Brasa Points / Fidelización
+            │   ├── router.py         # FastAPI endpoints (APIRouter)
+            │   ├── schemas.py        # Pydantic models (Request / Response)
+            │   ├── service.py        # Domain business logic and rules
+            │   ├── models.py         # Persistence / ORM models
+            │   └── repository.py     # Data access and queries
+            ├── loyalty/              # Brasa Points / Loyalty domain
             │   ├── __init__.py
             │   ├── router.py
             │   ├── schemas.py
             │   ├── service.py
             │   ├── models.py
             │   └── repository.py
-            └── talent/               # Dominio de People & Talent (candidatos y selección)
+            └── talent/               # People & Talent domain (candidates and hiring)
                 ├── __init__.py
                 ├── router.py
                 ├── schemas.py
@@ -109,239 +109,239 @@ services/
                 └── repository.py
 ```
 
-### 3.2. Propósito y Responsabilidad de Cada Nivel
+### 3.2. Purpose and Responsibility of Each Level
 
-- **`app/main.py`:** Punto de entrada de la aplicación. Configura el ciclo de vida de FastAPI, incluye los middlewares transversales (como CORS) y monta los routers versionados de cada dominio.
-- **`app/core/`:** Aloja configuraciones transversales que no pertenecen a un dominio de negocio específico, como la lectura de variables de entorno y utilidades globales.
-- **`app/db/`:** Centraliza la conexión con el motor de persistencia y la provisión de sesiones para la inyección de dependencias.
-- **`app/domains/<dominio>/`:**
-  - **`router.py`:** Capa de transporte HTTP. Define las rutas, métodos HTTP, códigos de estado, parámetros de entrada y esquemas de respuesta. No contiene lógica de negocio pesada ni consultas a base de datos.
-  - **`schemas.py`:** Define los contratos de datos (Data Transfer Objects) mediante esquemas de validación de FastAPI (Pydantic), asegurando la validación y serialización de peticiones y respuestas.
-  - **`service.py`:** Capa de negocio. Implementa las reglas operativas y cálculos de Brasaland (ej. validación de acumulación de puntos, políticas de edad, flujos de estado).
-  - **`models.py`:** Define la estructura de las tablas o entidades en la base de datos.
-  - **`repository.py`:** Capa de acceso a datos. Encapsula las consultas y operaciones de persistencia, aislando la lógica de negocio del motor de base de datos concreto.
+- **`app/main.py`:** Application entry point. Configures the FastAPI lifecycle, registers transversal middleware (such as CORS), and mounts versioned routers for each domain.
+- **`app/core/`:** Holds transversal configurations that do not belong to a specific business domain, such as environment variable loading and global utilities.
+- **`app/db/`:** Centralizes database connection setup and session provision for dependency injection.
+- **`app/domains/<domain>/`:**
+  - **`router.py`:** HTTP transport layer. Defines routes, HTTP methods, status codes, input parameters, and response schemas. Contains no heavy business logic or raw database queries.
+  - **`schemas.py`:** Defines data contracts (Data Transfer Objects) using FastAPI validation schemas (Pydantic), ensuring validation and serialization of requests and responses.
+  - **`service.py`:** Business layer. Implements Brasaland operational rules and calculations (e.g., points accrual validation, age policies, status transitions).
+  - **`models.py`:** Defines database table or entity structures.
+  - **`repository.py`:** Data access layer. Encapsulates persistence queries and operations, isolating business logic from the specific database engine.
 
 ---
 
-## 4. Separación por Dominios de Negocio
+## 4. Separation by Business Domains
 
-La delimitación de dominios surge directamente de la realidad operativa de Brasaland documentada en [CONTEXT.md](CONTEXT.md) y de los desarrollos existentes en el monorepo.
+Domain boundaries derive directly from the operational reality of Brasaland documented in [CONTEXT.md](CONTEXT.md) and existing monorepo developments.
 
 ```mermaid
 graph TD
-    subgraph "API Centralizada de Brasaland (FastAPI)"
-        subgraph "Dominios Iniciales (Fase 1)"
-            D1[locations<br/>Sedes en CO y US]
+    subgraph "Brasaland Centralized API (FastAPI)"
+        subgraph "Initial Domains (Phase 1)"
+            D1[locations<br/>Locations in CO and US]
             D2[loyalty<br/>Brasa Points]
             D3[talent<br/>People & Talent]
         end
-        subgraph "Capacidades Transversales (Core)"
-            C1[Configuración y Variables de Entorno]
-            C2[Middlewares y CORS]
-            C3[Salud /health]
-            C4[Autenticación / Autorización Futura]
+        subgraph "Transversal Capabilities (Core)"
+            C1[Configuration and Environment Variables]
+            C2[Middleware and CORS]
+            C3[Health /health]
+            C4[Future Authentication / Authorization]
         end
-        subgraph "Dominios Futuros (Fase 2)"
-            F1[menu<br/>Catálogo de Platos]
-            F2[orders<br/>Pedidos Online]
+        subgraph "Future Domains (Phase 2)"
+            F1[menu<br/>Dish Catalog]
+            F2[orders<br/>Online Orders]
         end
     end
 ```
 
-### 4.1. Dominios Iniciales (Fase 1)
+### 4.1. Initial Domains (Phase 1)
 
-1. **`locations` (Sedes y Restaurantes):**
-   - **Justificación:** Brasaland cuenta con 14 sedes en 2 países (10 en Colombia: Medellín, Bogotá, Cali; 4 en EE.UU.: Miami, Orlando).
-   - **Responsabilidad:** Listar sedes, filtrar por país y ciudad, consultar horarios (11:00 AM - 10:00 PM), teléfonos y direcciones.
-   - **Consumidores:** [uis/website](uis/website) (selector dinámico del formulario y vista de sedes) y [uis/backoffice](uis/backoffice) (tablero de ubicaciones).
+1. **`locations` (Locations and Restaurants):**
+   - **Justification:** Brasaland has 14 locations across 2 countries (10 in Colombia: Medellín, Bogotá, Cali; 4 in the US: Miami, Orlando).
+   - **Responsibility:** List locations, filter by country and city, query operating hours (Mon-Sun 11:00 AM - 10:00 PM), phone numbers, and addresses.
+   - **Consumers:** [uis/website](uis/website) (dynamic form selector and location view) and [uis/backoffice](uis/backoffice) (locations dashboard).
 
-2. **`loyalty` (Programa Brasa Points):**
-   - **Justificación:** Es el foco estratégico de marketing para sustituir las tarjetas físicas por un programa digital.
-   - **Responsabilidad:** Registro de usuarios en Brasa Points, validación estricta de edad (mínimo 18 años), preferencias alimentarias, origen del contacto, aceptación de términos y reglas de acumulación (1 punto por cada $10.000 COP o $5 USD).
-   - **Consumidores:** [uis/website](uis/website) (formulario de inscripción) y [uis/backoffice](uis/backoffice) (seguimiento del programa).
+2. **`loyalty` (Brasa Points Loyalty Program):**
+   - **Justification:** Core strategic marketing initiative to replace physical stamp cards with a digital program.
+   - **Responsibility:** User registration in Brasa Points, strict age validation (minimum 18 years old), dietary preferences, referral source, terms acceptance, and points accrual rules (1 point per 10,000 COP or 5 USD).
+   - **Consumers:** [uis/website](uis/website) (registration form) and [uis/backoffice](uis/backoffice) (loyalty program monitoring).
 
-3. **`talent` (People & Talent / Reclutamiento):**
-   - **Justificación:** La empresa gestiona procesos de selección para cerca de 115 empleados operativos y corporativos.
-   - **Responsabilidad:** Modelar candidatos, etapas del proceso (`pending`, `review`, `personal_interview`, `technical_interview`, `offer_presented`), estados (`received`, `in_progress`, `selected`, `discarded`) y notas internas.
-   - **Consumidores:** Preparado para una futura integración o persistencia interna de herramientas de talento como [uis/talent-pipeline-tracker](uis/talent-pipeline-tracker).
+3. **`talent` (People & Talent / Recruitment):**
+   - **Justification:** Brasaland has approximately 115 employees and already has an internal People & Talent application for managing recruitment processes.
+   - **Responsibility:** Model candidates, hiring pipeline stages (`pending`, `review`, `personal_interview`, `technical_interview`, `offer_presented`), statuses (`received`, `in_progress`, `selected`, `discarded`), and internal notes.
+   - **Consumers:** Prepared for future internal integration or persistence for talent tools such as [uis/talent-pipeline-tracker](uis/talent-pipeline-tracker).
 
-### 4.2. Dominios y Capacidades Futuras (Fase 2)
+### 4.2. Future Domains and Capabilities (Phase 2)
 
-- **`menu` (Menú y Platos):**
-  - Gestión centralizada del catálogo de comidas a la parrilla, categorías y precios por moneda (COP / USD).
-- **`orders` (Pedidos Online):**
-  - Respaldado explícitamente por el mensaje de [CONTEXT.md](CONTEXT.md): _"Want to place an order? Call your favorite location or visit us directly. Online ordering coming soon!"_.
-- **Autenticación y Autorización (`auth`):**
-  - Capacidad transversal futura necesaria para proteger los endpoints internos utilizados por el backoffice y los sistemas de People & Talent, separándolos del acceso público de clientes.
+- **`menu` (Menu and Dishes):**
+  - Centralized catalog management for grilled dishes, categories, and pricing by currency (COP / USD).
+- **`orders` (Online Orders):**
+  - Explicitly backed by the message in [CONTEXT.md](CONTEXT.md): _"Want to place an order? Call your favorite location or visit us directly. Online ordering coming soon!"_.
+- **Authentication and Authorization (`auth`):**
+  - Future transversal capability required to protect internal endpoints used by the backoffice and People & Talent systems, separating them from public customer access.
 
-### 4.3. Relación con `brasaland-domain`
+### 4.3. Relationship with `brasaland-domain`
 
-El paquete TypeScript [packages/brasaland-domain](packages/brasaland-domain) contiene interfaces y datos de referencia ya validados en el frontend. El backend en Python no reutiliza directamente dicho código fuente, pero debe respetar los mismos conceptos de negocio, nombres de ciudades, sedes y tipos para preservar la coherencia semántica en todo el monorepo. El backend mantendrá sus propios esquemas y validaciones autoritativas.
+The TypeScript package [packages/brasaland-domain](packages/brasaland-domain) contains interfaces and reference data already validated in the frontend. The Python backend does not directly reuse this source code, but it must respect the same business concepts, city names, locations, and types to preserve semantic consistency across the monorepo. The backend will maintain its own authoritative schemas and validations.
 
 ---
 
-## 5. Organización de Routers y Endpoints FastAPI
+## 5. Organization of Routers and FastAPI Endpoints
 
-La API adoptará una convención REST organizada mediante `APIRouter` de FastAPI, estructurada bajo un prefijo global versionado `/api/v1`.
+The API will adopt a REST convention organized via FastAPI `APIRouter` instances, structured under a global versioned prefix `/api/v1`.
 
-### 5.1. Esquema Conceptual de Rutas
+### 5.1. Conceptual Route Map
 
 ```text
 /api/v1/
 ├── /locations
-│   ├── GET    /locations                  # Listar todas las sedes (soporta filtros ?country=Colombia&city=Medellin)
-│   └── GET    /locations/{location_id}    # Detalle de una sede específica
+│   ├── GET    /locations                  # List all locations (supports filters ?country=Colombia&city=Medellin)
+│   └── GET    /locations/{location_id}    # Detail of a specific location
 │
 ├── /loyalty
-│   ├── POST   /loyalty/registrations      # Registrar nuevo miembro en Brasa Points (+18, datos requeridos)
-│   └── GET    /loyalty/summary            # Resumen de métricas del programa para backoffice
+│   ├── POST   /loyalty/registrations      # Register a new member in Brasa Points (18+, required fields)
+│   └── GET    /loyalty/summary            # Program metrics summary for backoffice
 │
 └── /talent
-    ├── GET    /talent/candidates          # Listar candidatos (?status=...&stage=...&search=...)
-    ├── POST   /talent/candidates          # Crear nueva candidatura
-    ├── GET    /talent/candidates/{id}     # Detalle de un candidato
-    ├── PATCH  /talent/candidates/{id}     # Actualizar etapa o estado del candidato
-    ├── GET    /talent/candidates/{id}/notes # Listar notas de un candidato
-    └── POST   /talent/candidates/{id}/notes # Añadir nota interna a un candidato
+    ├── GET    /talent/candidates          # List candidates (?status=...&stage=...&search=...)
+    ├── POST   /talent/candidates          # Create a new candidate application
+    ├── GET    /talent/candidates/{id}     # Detail of a candidate
+    ├── PATCH  /talent/candidates/{id}     # Update candidate status or stage
+    ├── GET    /talent/candidates/{id}/notes # List candidate notes
+    └── POST   /talent/candidates/{id}/notes # Add an internal note to a candidate
 ```
 
-### 5.2. Justificación de la Agrupación
+### 5.2. Justification of Grouping
 
-- **Agrupación por recurso/dominio:** Cada `APIRouter` se define dentro de su propio módulo (`domains/<dominio>/router.py`) con sus etiquetas (_tags_) para la documentación automática OpenAPI/Swagger.
-- **Versionado explícito (`/api/v1`):** Permite evolucionar los contratos de la API en el futuro sin romper el funcionamiento de las interfaces que consumen versiones previas.
-- **Modularidad en `main.py`:** Los routers se registran en la aplicación principal con una sola línea por módulo mediante `app.include_router(...)`, manteniendo el archivo principal conciso y desacoplado.
-
----
-
-## 6. Investigación sobre Estructura FastAPI
-
-Para asegurar que la propuesta sigue los estándares de la industria, se analizaron las directrices de la documentación oficial de FastAPI respecto a aplicaciones de mayor escala y múltiples archivos (_Bigger Applications - Multiple Files_).
-
-### 6.1. Convenciones Oficiales Identificadas
-
-1. **Uso de `APIRouter` independientes:**
-   FastAPI recomienda estructurar aplicaciones complejas dividiendo los endpoints en instancias de `APIRouter` dedicadas por módulo o funcionalidad, en lugar de declarar todas las rutas sobre el objeto principal `app`.
-2. **Inclusión centralizada de routers con prefijos y tags:**
-   La aplicación principal (`FastAPI()`) incluye cada sub-router especificando su `prefix` (ej. `/api/v1/locations`) y `tags` (ej. `["Locations"]`), facilitando la generación limpia de la documentación interactiva en `/docs`.
-3. **Inyección de Dependencias (`Depends`):**
-   FastAPI promueve el uso del sistema de dependencias para gestionar conexiones a bases de datos, autenticación y servicios de negocio, asegurando que los routers no instancien clientes manualmente ni gestionen ciclos de vida de recursos de bajo nivel.
-4. **Validación Declarativa con Esquemas (Pydantic):**
-   La separación entre esquemas de entrada (validación de payload entrante) y salida (filtrado y serialización de respuesta) es el pilar de robustez de FastAPI, previniendo la exposición accidental de campos internos.
+- **Grouping by resource/domain:** Each `APIRouter` is defined within its own module (`domains/<domain>/router.py`) with dedicated tags for automatic OpenAPI/Swagger documentation.
+- **Explicit versioning (`/api/v1`):** Allows evolving API contracts in the future without breaking frontend clients consuming earlier versions.
+- **Modularity in `main.py`:** Routers are registered in the main application with a single line per module using `app.include_router(...)`, keeping the main entry file concise and decoupled.
 
 ---
 
-## 7. Frontend y Backend como Sistemas Separados
+## 6. Research on FastAPI Application Structure
 
-Las aplicaciones de interfaz ([uis/website](uis/website), [uis/backoffice](uis/backoffice)) y el backend ([services/](services/)) son sistemas independientes que se comunican exclusivamente a través del protocolo **HTTP en formato JSON**.
+To ensure the proposal follows industry standards, guidelines from the official FastAPI documentation regarding larger applications and multiple files (_Bigger Applications - Multiple Files_) were analyzed.
+
+### 6.1. Identified Official Conventions
+
+1. **Use of independent `APIRouter` instances:**
+   FastAPI recommends structuring complex applications by breaking endpoints into dedicated `APIRouter` instances per module or feature, rather than declaring all routes on the main `app` object.
+2. **Centralized router inclusion with prefixes and tags:**
+   The main application (`FastAPI()`) includes each sub-router specifying its `prefix` (e.g., `/api/v1/locations`) and `tags` (e.g., `["Locations"]`), enabling clean interactive documentation in `/docs`.
+3. **Dependency Injection (`Depends`):**
+   FastAPI promotes dependency injection to manage database connections, authentication, and business services, ensuring routers do not manually instantiate clients or manage low-level resource lifecycles.
+4. **Declarative Validation with Schemas (Pydantic):**
+   Separating input schemas (validating incoming payloads) from output schemas (filtering and serializing responses) is fundamental to FastAPI reliability, preventing unintended exposure of internal fields.
+
+---
+
+## 7. Frontend and Backend as Separate Systems
+
+Frontend applications ([uis/website](uis/website), [uis/backoffice](uis/backoffice)) and the backend ([services/](services/)) are independent systems that communicate exclusively over **HTTP using JSON**.
 
 ```mermaid
 flowchart LR
-    subgraph Frontend ["Capa de Interfaces (uis/)"]
-        Web["uis/website<br/>(Landing + Formulario)"]
-        Back["uis/backoffice<br/>(Panel Operativo)"]
+    subgraph Frontend ["User Interfaces Layer (uis/)"]
+        Web["uis/website<br/>(Landing + Form)"]
+        Back["uis/backoffice<br/>(Operations Panel)"]
     end
 
-    subgraph Backend ["Capa Backend (services/api)"]
+    subgraph Backend ["Backend Layer (services/api)"]
         API["FastAPI App<br/>(/api/v1)"]
-        DB[(Base de Datos)]
+        DB[(Database)]
     end
 
     Web -->|HTTP / JSON (CORS)| API
     Back -->|HTTP / JSON (CORS)| API
-    API -->|Consultas internas| DB
+    API -->|Internal queries| DB
 
     style DB fill:#f9f,stroke:#333,stroke-width:1px
 ```
 
-### 7.1. Aislamiento de la Base de Datos
+### 7.1. Database Isolation
 
-Ninguna interfaz de usuario accede directamente a la base de datos ni a motores de almacenamiento interno. Todo acceso a datos está mediado por la API, la cual aplica autenticación, validación de esquemas y reglas de negocio.
+No user interface accesses the database or internal storage engines directly. All data access is mediated by the API, which enforces authentication, schema validation, and business rules.
 
-### 7.2. Configuración de URLs Base y Variables de Entorno
+### 7.2. Base URL Configuration and Environment Variables
 
-- Las aplicaciones cliente configuran la URL base del backend mediante variables de entorno en tiempo de ejecución o desarrollo:
-  - En aplicaciones estáticas ([uis/website](uis/website), [uis/backoffice](uis/backoffice)): mediante variables globales de configuración en un archivo `config.js` o variables de entorno locales.
-  - En aplicaciones React/Next.js ([uis/talent-pipeline-tracker](uis/talent-pipeline-tracker)): mediante `NEXT_PUBLIC_API_URL` configurado en `.env.local` y documentado en `.env.example`.
-- El backend nunca fija URLs absolutas en el código fuente; los puertos y hosts se parametrizan en su propia configuración.
+- Client applications configure the backend base URL via runtime or build-time environment variables:
+  - In static frontend applications ([uis/website](uis/website), [uis/backoffice](uis/backoffice)): via global configuration variables in a `config.js` file or local environment settings.
+  - In React/Next.js applications ([uis/talent-pipeline-tracker](uis/talent-pipeline-tracker)): via `NEXT_PUBLIC_API_URL` configured in `.env.local` and documented in `.env.example`.
+- The backend never hardcodes absolute URLs in source code; ports and hosts are parameterized in its own configuration.
 
-### 7.3. Política de CORS (Cross-Origin Resource Sharing)
+### 7.3. CORS (Cross-Origin Resource Sharing) Policy
 
-Dado que las interfaces frontend y el backend se ejecutan en diferentes puertos u orígenes durante el desarrollo local (y en diferentes dominios o subdominios en producción), FastAPI debe configurar el middleware oficial `CORSMiddleware`.
+Because frontend interfaces and the backend run on different ports or origins during local development (and across different domains or subdomains in production), FastAPI must configure the official `CORSMiddleware`.
 
-- **Desarrollo local:** Se configuran orígenes permitidos explícitos para las aplicaciones locales (ej. `http://localhost:3000`, `http://localhost:5500`, `http://127.0.0.1:5500`).
-- **Producción:** Se restringen los orígenes exclusivamente a los dominios oficiales de la empresa (`https://brasaland.com`, `https://backoffice.brasaland.com`).
-- **Seguridad:** No se debe utilizar `allow_origins=["*"]` en producción, especialmente si se manejan credenciales o datos internos.
-
----
-
-## 8. Decisiones Técnicas Iniciales
-
-A continuación se resumen las decisiones técnicas clave para la futura implementación del backend:
-
-1. **API Única Centralizada:**
-   - Se mantiene un único backend en FastAPI bajo `services/` para toda la compañía, evitando la fragmentación en microservicios durante esta etapa del proyecto.
-2. **Versionado de Rutas (`/api/v1`):**
-   - Todos los endpoints de negocio se agruparán bajo el prefijo `/api/v1/` para permitir una evolución controlada sin romper clientes existentes.
-3. **Configuración Centralizada mediante Variables de Entorno:**
-   - La configuración (puerto, entorno, cadenas de conexión, orígenes CORS) se gestionará en un módulo centralizado (`core/config.py`) que lee variables de entorno del sistema.
-4. **Separación de Responsabilidades por Capas:**
-   - **Transporte (Routers):** Reciben peticiones HTTP y delegan.
-   - **Validación (Schemas):** Contratos de datos y validación de tipos.
-   - **Negocio (Services):** Reglas operativas y cálculos de Brasaland.
-   - **Persistencia (Repositories & Models):** Interacción aislada con la base de datos.
-5. **Estrategia de Acceso a Datos:**
-   - Se utilizará un patrón repositorio o capa de abstracción para que las reglas de negocio no dependan de la sintaxis específica del motor de base de datos.
+- **Local development:** Explicit allowed origins are configured for local frontend apps (e.g., `http://localhost:3000`, `http://localhost:5500`, `http://127.0.0.1:5500`).
+- **Production:** Allowed origins are restricted strictly to official company domains (`https://brasaland.com`, `https://backoffice.brasaland.com`).
+- **Security:** `allow_origins=["*"]` must not be used in production, especially when credentials or internal data are handled.
 
 ---
 
-## 9. Riesgos y Puntos de Atención
+## 8. Initial Technical Decisions
 
-Se identifican los siguientes riesgos técnicos y arquitectónicos que deben vigilarse durante la fase de desarrollo:
+The key technical decisions for future backend implementation are summarized below:
 
-1. **Riesgo 1: Lógica de negocio acumulada en los Routers (_Fat Routers_)**
-   - _Consecuencia:_ Si las validaciones complejas, cálculos de puntos o consultas a base de datos se escriben directamente en las funciones del endpoint, el código se vuelve difícil de probar de forma unitaria, se duplica entre rutas y se acopla excesivamente al protocolo HTTP.
-   - _Mitigación:_ Forzar que los routers únicamente validen la entrada mediante esquemas y deleguen la ejecución a la capa de `services`.
-
-2. **Riesgo 2: Acoplamiento cruzado indebido entre dominios**
-   - _Consecuencia:_ Si el módulo `loyalty` importa y manipula directamente modelos internos de `talent` o viceversa, se pierde la modularidad del monolito, generando un "gran fango" (_Big Ball of Mud_) que complicará cualquier refactorización futura.
-   - _Mitigación:_ Definir interfaces y servicios claros; si un dominio requiere datos de otro, debe interactuar a través de su servicio público o funciones bien delimitadas.
-
-3. **Riesgo 3: Duplicación y desalineación de reglas de negocio entre Frontend y Backend**
-   - _Consecuencia:_ Si el frontend ([uis/website](uis/website)) y el backend implementan reglas distintas para la validación de edad, cálculo de puntos o formato de teléfono, se generarán errores confusos para los usuarios (ej. el formulario web acepta una entrada que el backend rechaza con error 422).
-   - _Mitigación:_ Considerar las reglas documentadas en [packages/brasaland-domain](packages/brasaland-domain) como referencia de consistencia y mantener las especificaciones de validación alineadas en los esquemas del backend.
-
-4. **Riesgo 4: Políticas CORS excesivamente permisivas en Producción**
-   - _Consecuencia:_ Configurar `allow_origins=["*"]` en producción expone la API a ataques de origen cruzado no autorizados desde sitios web de terceros.
-   - _Mitigación:_ Parametrizar la lista de orígenes permitidos a través de variables de entorno, usando listas estrictas para cada entorno.
-
-5. **Riesgo 5: Fuga de datos sensibles entre dominios públicos y privados**
-   - _Consecuencia:_ Exponer en endpoints públicos información sensible de candidatos o notas internas de People & Talent, o compartir modelos de respuesta sin filtrar campos privados.
-   - _Mitigación:_ Uso estricto de esquemas de respuesta Pydantic diferenciados para entidades públicas y privadas, garantizando que nunca se retornen modelos de base de datos completos directamente al cliente.
+1. **Single Centralized API:**
+   - A single FastAPI backend under `services/` is maintained for the entire company, avoiding premature microservices fragmentation during this project phase.
+2. **Route Versioning (`/api/v1`):**
+   - All business endpoints are grouped under the `/api/v1/` prefix to allow controlled evolution without breaking existing clients.
+3. **Centralized Configuration via Environment Variables:**
+   - Configuration (port, environment, connection strings, CORS origins) will be managed in a centralized module (`core/config.py`) reading system environment variables.
+4. **Layered Separation of Concerns:**
+   - **Transport (Routers):** Receive HTTP requests and delegate execution.
+   - **Validation (Schemas):** Data contracts and type validation.
+   - **Business (Services):** Brasaland operational rules and calculations.
+   - **Persistence (Repositories & Models):** Isolated database interactions.
+5. **Data Access Strategy:**
+   - A repository pattern or data abstraction layer will be used so business rules do not depend on the specific syntax of a database engine.
 
 ---
 
-## 10. Conclusión
+## 9. Risks and Key Attention Points
 
-La arquitectura de **Monolito Modular en Capas con FastAPI** propuesta para Brasaland proporciona el equilibrio adecuado entre simplicidad operativa y solidez estructural. Permite resolver de inmediato las necesidades de las aplicaciones existentes ([uis/website](uis/website), [uis/backoffice](uis/backoffice)) mediante una API centralizada, limpia y tipada, sin incurrir en la sobrecarga prematura de una infraestructura de microservicios. Al organizar el código en dominios de negocio claramente delimitados (`locations`, `loyalty`, `talent`) y separar la capa de transporte de la lógica de negocio, Brasaland dispone de una base técnica lista para escalar de manera orgánica a medida que se incorporen nuevas capacidades como pedidos online o menús dinámicos.
+The following technical and architectural risks must be monitored during development:
+
+1. **Risk 1: Business logic accumulating in Routers (_Fat Routers_)**
+   - _Consequence:_ If complex validations, points calculations, or database queries are written directly in endpoint functions, code becomes difficult to unit-test, is duplicated across routes, and couples tightly to HTTP.
+   - _Mitigation:_ Enforce that routers only validate input through schemas and delegate execution to the `services` layer.
+
+2. **Risk 2: Improper cross-domain coupling**
+   - _Consequence:_ If the `loyalty` module directly imports and modifies internal models of `talent` or vice versa, the modularity of the monolith is lost, creating a "Big Ball of Mud" that complicates future refactoring.
+   - _Mitigation:_ Define clear interfaces and services; if one domain needs data from another, it must interact through its public service or well-defined functions.
+
+3. **Risk 3: Business rule duplication and drift between Frontend and Backend**
+   - _Consequence:_ If frontend ([uis/website](uis/website)) and backend implement differing rules for age validation, points calculations, or phone formatting, confusing user errors arise (e.g., the web form accepts input that the backend rejects with 422).
+   - _Mitigation:_ Treat rules documented in [packages/brasaland-domain](packages/brasaland-domain) as a semantic reference and keep validation specifications aligned with backend schemas.
+
+4. **Risk 4: Overly permissive CORS policies in Production**
+   - _Consequence:_ Configuring `allow_origins=["*"]` in production exposes the API to unauthorized cross-origin requests from third-party websites.
+   - _Mitigation:_ Parameterize the list of allowed origins via environment variables, using strict lists for each environment.
+
+5. **Risk 5: Sensitive data leakage between public and private domains**
+   - _Consequence:_ Exposing sensitive candidate information or internal People & Talent notes in public endpoints, or sharing response models without filtering private fields.
+   - _Mitigation:_ Strictly use differentiated Pydantic response schemas for public and private entities, ensuring raw database models are never returned directly to the client.
 
 ---
 
-## 11. Referencias
+## 10. Conclusion
 
-Documentación oficial consultada para la elaboración de esta propuesta:
+The proposed **Layered Modular Monolith with FastAPI** architecture for Brasaland provides the right balance between operational simplicity and structural robustness. It immediately solves the requirements of existing applications ([uis/website](uis/website), [uis/backoffice](uis/backoffice)) through a centralized, clean, and typed API without incurring premature microservice overhead. By organizing code into clearly bounded business domains (`locations`, `loyalty`, `talent`) and decoupling the transport layer from business logic, Brasaland gains a solid technical foundation ready to scale organically as new capabilities such as online ordering or dynamic menus are added.
+
+---
+
+## 11. References
+
+Official documentation consulted for this proposal:
 
 - **FastAPI — Bigger Applications - Multiple Files:**  
   [https://fastapi.tiangolo.com/tutorial/bigger-applications/](https://fastapi.tiangolo.com/tutorial/bigger-applications/)  
-  _Guía oficial sobre la estructura modular basada en `APIRouter` y organización de paquetes por funcionalidad._
+  _Official guide on modular structure based on `APIRouter` and package organization by feature._
 
 - **FastAPI — CORS (Cross-Origin Resource Sharing):**  
   [https://fastapi.tiangolo.com/tutorial/cors/](https://fastapi.tiangolo.com/tutorial/cors/)  
-  _Documentación sobre la integración y configuración segura de `CORSMiddleware` en FastAPI._
+  _Documentation on integrating and securely configuring `CORSMiddleware` in FastAPI._
 
-- **FastAPI — Dependencies (Inyección de Dependencias):**  
+- **FastAPI — Dependencies (Dependency Injection):**
   [https://fastapi.tiangolo.com/tutorial/dependencies/](https://fastapi.tiangolo.com/tutorial/dependencies/)  
-  _Buenas prácticas para desacoplar lógica de infraestructura, bases de datos y seguridad en endpoints._
+  _Best practices for decoupling infrastructure logic, databases, and security in endpoints._
 
 - **Pydantic Documentation:**  
   [https://docs.pydantic.dev/latest/](https://docs.pydantic.dev/latest/)  
-  _Referencia de esquemas, serialización y validación de datos para APIs en Python._
+  _Reference for data schemas, serialization, and validation for Python APIs._
