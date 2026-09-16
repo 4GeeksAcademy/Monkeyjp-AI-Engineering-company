@@ -11,15 +11,27 @@ All agents must follow these instructions before modifying or committing project
 At the beginning of every development session, read the following files in this order:
 
 1. `CONTEXT.md`
-2. `memory-bank/projectbrief.md`
-3. `memory-bank/techContext.md`
-4. `memory-bank/progress.md`
-5. Relevant files under `.agents/rules/`
-6. The `README.md` of every top-level directory affected by the task
+2. Any milestone-specific context file that applies to the current task (see "Milestone-Specific Context" below)
+3. `memory-bank/projectbrief.md`
+4. `memory-bank/techContext.md`
+5. `memory-bank/progress.md`
+6. Relevant files under `.agents/rules/`
+7. The `README.md` of every top-level directory affected by the task
 
 Do not begin implementation until the relevant project context has been reviewed.
 
-`CONTEXT.md` is the primary source of truth for Brasaland business requirements.
+`CONTEXT.md` is the primary source of truth for general Brasaland business requirements.
+
+## Milestone-Specific Context
+
+Some tasks belong to a specific milestone or domain (e.g. incident analysis, talent pipeline) that has its own context file under `docs/**/CONTEXT-*.md`.
+
+When a task belongs to such a milestone/domain:
+
+- Locate and read the matching `docs/**/CONTEXT-*.md` file(s) in addition to `CONTEXT.md`.
+- Treat the milestone-specific context as an **extension** of `CONTEXT.md`, not a replacement. General company facts (brand, stakeholders, locations, etc.) still come from `CONTEXT.md`; the milestone file adds the domain-specific requirements (data structures, rules, expected outputs, etc.) for that task.
+- When both a `.md` (English) and `.es.md` (Spanish) version of a context file exist, prefer the version whose language matches the current task/session language. Fall back to the other language if the preferred one is missing.
+- If it is unclear which milestone context applies, ask the developer before proceeding.
 
 ---
 

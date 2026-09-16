@@ -2,7 +2,7 @@
 
 ## Milestone 1: Your Company's Public Website
 
-_Estas instrucciones están [disponibles en español](./CONTEXT-brasaland.es.md)._
+_Estas instrucciones están [disponibles en español](./CONTEXT.es.md)._
 
 > This document describes your company and the specific situation you're building this milestone for. Read it completely before writing any code. Everything you build must reflect this context.
 
