@@ -1,226 +1,97 @@
 import {
-    Ciudad,
-    Pais,
-    RegistroBrasaPoints,
-    Restaurante,
-    ResultadoValidacion
+  Location,
+  MenuItem,
+  SaleTransaction
 } from "../types/models";
 
-import {
-    calcularEdad
-} from "./transformations";
+export const validateMenuItem = (
+  item: MenuItem
+): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
 
-export const validarNombreCompleto = (
-    nombreCompleto: string
-): boolean => {
-    const palabras = nombreCompleto
-        .trim()
-        .split(/\s+/);
+  if (item.id.trim() === "") {
+    errors.push("id must not be empty");
+  }
 
-    return palabras.length >= 2;
+  if (item.name.trim() === "") {
+    errors.push("name must not be empty");
+  }
+
+  if (item.basePrice.USD <= 0 || item.basePrice.COP <= 0) {
+    errors.push("basePrice USD and COP must be > 0");
+  }
+
+  if (item.ingredientCost.USD <= 0 || item.ingredientCost.COP <= 0) {
+    errors.push("ingredientCost USD and COP must be > 0");
+  }
+
+  if (item.prepTimeMinutes <= 0 || item.prepTimeMinutes > 60) {
+    errors.push("prepTimeMinutes must be > 0 and <= 60");
+  }
+
+  if (!item.isAvailableInColombia && !item.isAvailableInUSA) {
+    errors.push("Item must be available in at least one country");
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
 };
 
-export const validarEmail = (
-    email: string
-): boolean => {
-    const patronEmail =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const validateSaleTransaction = (
+  sale: SaleTransaction
+): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
 
-    return patronEmail.test(email);
+  if (sale.quantity <= 0) {
+    errors.push("quantity must be > 0");
+  }
+
+  if (sale.totalPrice.USD <= 0 || sale.totalPrice.COP <= 0) {
+    errors.push("totalPrice USD and COP must be > 0");
+  }
+
+  if (sale.waiterName.trim() === "") {
+    errors.push("waiterName must not be empty");
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
 };
 
-export const validarTelefono = (
-    telefono: string,
-    pais: Pais
-): boolean => {
-    const telefonoLimpio =
-        telefono.replace(/\s/g, "");
+export const validateLocation = (
+  location: Location
+): { valid: boolean; errors: string[] } => {
+  const errors: string[] = [];
 
-    if (pais === "Colombia") {
-        return /^\+57\d+$/.test(
-            telefonoLimpio
-        );
-    }
+  if (location.openingYear < 2008 || location.openingYear > new Date().getFullYear()) {
+    errors.push("openingYear must be >= 2008 and <= current year");
+  }
 
-    return /^\+1\d+$/.test(
-        telefonoLimpio
-    );
-};
+  if (location.seatingCapacity <= 0) {
+    errors.push("seatingCapacity must be > 0");
+  }
 
-export const validarCiudadPorPais = (
-    pais: Pais,
-    ciudad: Ciudad
-): boolean => {
-    const ciudadesPorPais: Record<
-        Pais,
-        Ciudad[]
-    > = {
-        Colombia: [
-            "Medellín",
-            "Bogotá",
-            "Cali"
-        ],
+  if (location.staffCount <= 0) {
+    errors.push("staffCount must be > 0");
+  }
 
-        "Estados Unidos": [
-            "Miami",
-            "Orlando"
-        ]
-    };
+  if (location.monthlyRentCost.USD <= 0 || location.monthlyRentCost.COP <= 0) {
+    errors.push("monthlyRentCost USD and COP must be > 0");
+  }
 
-    return ciudadesPorPais[pais].includes(
-        ciudad
-    );
-};
+  if (
+    location.averageMonthlyUtilities.USD <= 0 ||
+    location.averageMonthlyUtilities.COP <= 0
+  ) {
+    errors.push("averageMonthlyUtilities USD and COP must be > 0");
+  }
 
-export const validarUbicacionFavorita = (
-    ubicacionFavorita: string | undefined,
-    pais: Pais,
-    ciudad: Ciudad,
-    restaurantes: Restaurante[]
-): boolean => {
-    if (!ubicacionFavorita) {
-        return true;
-    }
-
-    return restaurantes.some(
-        (restaurante) =>
-            restaurante.nombre === ubicacionFavorita &&
-            restaurante.pais === pais &&
-            restaurante.ciudad === ciudad
-    );
-};
-
-export const validarFechaNacimiento = (
-    fechaNacimiento: string
-): boolean => {
-    const patronFecha =
-        /^\d{4}-\d{2}-\d{2}$/;
-
-    if (!patronFecha.test(fechaNacimiento)) {
-        return false;
-    }
-
-    const [anio, mes, dia] =
-        fechaNacimiento.split("-").map(Number);
-
-    const fecha = new Date(
-        anio,
-        mes - 1,
-        dia
-    );
-
-    return (
-        fecha.getFullYear() === anio &&
-        fecha.getMonth() === mes - 1 &&
-        fecha.getDate() === dia
-    );
-};
-
-export const validarMayorDeEdad = (
-    fechaNacimiento: string,
-    fechaReferencia: Date
-): boolean => {
-    if (!validarFechaNacimiento(
-        fechaNacimiento
-    )) {
-        return false;
-    }
-
-    return (
-        calcularEdad(
-            fechaNacimiento,
-            fechaReferencia
-        ) >= 18
-    );
-};
-
-export const validarTerminos = (
-    aceptaTerminos: boolean
-): boolean => {
-    return aceptaTerminos;
-};
-
-export const validarRegistroBrasaPoints = (
-    registro: RegistroBrasaPoints,
-    restaurantes: Restaurante[],
-    fechaReferencia: Date
-): ResultadoValidacion => {
-    const errores: string[] = [];
-
-    if (
-        !validarNombreCompleto(
-            registro.nombreCompleto
-        )
-    ) {
-        errores.push(
-            "Ingresa tu nombre completo (nombre y apellido)"
-        );
-    }
-
-    if (!validarEmail(registro.email)) {
-        errores.push(
-            "Ingresa un email válido (ejemplo: nombre@correo.com)"
-        );
-    }
-
-    if (
-        !validarTelefono(
-            registro.telefono,
-            registro.pais
-        )
-    ) {
-        errores.push(
-            "El teléfono debe incluir código de país (ejemplo: +57 300 123 4567 o +1 305 123 4567)"
-        );
-    }
-
-    if (
-        !validarCiudadPorPais(
-            registro.pais,
-            registro.ciudad
-        )
-    ) {
-        errores.push(
-            "Selecciona tu ciudad"
-        );
-    }
-
-    if (
-        !validarUbicacionFavorita(
-            registro.ubicacionFavorita,
-            registro.pais,
-            registro.ciudad,
-            restaurantes
-        )
-    ) {
-        errores.push(
-            "La ubicación favorita no corresponde al país y ciudad seleccionados"
-        );
-    }
-
-    if (
-        !validarMayorDeEdad(
-            registro.fechaNacimiento,
-            fechaReferencia
-        )
-    ) {
-        errores.push(
-            "Debes ser mayor de 18 años para registrarte en Brasa Points"
-        );
-    }
-
-    if (
-        !validarTerminos(
-            registro.aceptaTerminos
-        )
-    ) {
-        errores.push(
-            "Debes aceptar los términos del programa Brasa Points para continuar"
-        );
-    }
-
-    return {
-        esValido: errores.length === 0,
-        errores
-    };
+  return {
+    valid: errors.length === 0,
+    errors
+  };
 };

@@ -1,46 +1,42 @@
-import { Restaurante } from "../types/models";
+import { Location, MenuItem } from "../types/models";
 
-export const busquedaLinealPorNombre = (
-    restaurantes: Restaurante[],
-    nombre: string
-): number => {
-    for (let i = 0; i < restaurantes.length; i++) {
-        if (restaurantes[i].nombre === nombre) {
-            return i;
-        }
-    }
-
-    return -1;
+export const findLocationById = (
+  locations: Location[],
+  id: string
+): Location | null => {
+  return locations.find((location) => location.id === id) ?? null;
 };
 
-export const busquedaBinariaPorNombre = (
-    restaurantesOrdenados: Restaurante[],
-    nombre: string
+export const findMenuItemByName = (
+  items: MenuItem[],
+  name: string
+): MenuItem | null => {
+  const normalizedName = name.trim().toLowerCase();
+
+  return items.find((item) => item.name.toLowerCase() === normalizedName) ?? null;
+};
+
+export const binarySearchLocationByCapacity = (
+  sortedLocations: Location[],
+  targetCapacity: number
 ): number => {
-    let izquierda = 0;
-    let derecha = restaurantesOrdenados.length - 1;
+  let left = 0;
+  let right = sortedLocations.length - 1;
 
-    while (izquierda <= derecha) {
-        const medio = Math.floor(
-            (izquierda + derecha) / 2
-        );
+  while (left <= right) {
+    const middle = Math.floor((left + right) / 2);
+    const currentCapacity = sortedLocations[middle]?.seatingCapacity;
 
-        const restauranteActual =
-            restaurantesOrdenados[medio];
-
-        const comparacion =
-            restauranteActual.nombre.localeCompare(nombre);
-
-        if (comparacion === 0) {
-            return medio;
-        }
-
-        if (comparacion < 0) {
-            izquierda = medio + 1;
-        } else {
-            derecha = medio - 1;
-        }
+    if (currentCapacity === targetCapacity) {
+      return middle;
     }
 
-    return -1;
+    if (currentCapacity !== undefined && currentCapacity < targetCapacity) {
+      left = middle + 1;
+    } else {
+      right = middle - 1;
+    }
+  }
+
+  return -1;
 };

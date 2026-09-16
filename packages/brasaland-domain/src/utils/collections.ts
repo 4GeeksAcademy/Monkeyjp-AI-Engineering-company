@@ -1,100 +1,61 @@
 import {
-    Ciudad,
-    Pais,
-    RegistroBrasaPoints,
-    Restaurante
+  Location,
+  MenuCategory,
+  MenuItem,
+  SaleTransaction
 } from "../types/models";
 
-export const filtrarRestaurantesPorPais = (
-    restaurantes: Restaurante[],
-    pais: Pais
-): Restaurante[] => {
-    return restaurantes.filter(
-        (restaurante) => restaurante.pais === pais
-    );
+export const filterSalesByLocation = (
+  sales: SaleTransaction[],
+  locationId: string
+): SaleTransaction[] => {
+  return sales.filter((sale) => sale.locationId === locationId);
 };
 
-export const filtrarRestaurantesPorCiudad = (
-    restaurantes: Restaurante[],
-    ciudad: Ciudad
-): Restaurante[] => {
-    return restaurantes.filter(
-        (restaurante) => restaurante.ciudad === ciudad
-    );
+export const filterSalesByDateRange = (
+  sales: SaleTransaction[],
+  startDate: Date,
+  endDate: Date
+): SaleTransaction[] => {
+  return sales.filter(
+    (sale) => sale.timestamp >= startDate && sale.timestamp <= endDate
+  );
 };
 
-export const filtrarRestaurantesPorPaisYCiudad = (
-    restaurantes: Restaurante[],
-    pais: Pais,
-    ciudad: Ciudad
-): Restaurante[] => {
-    return restaurantes.filter(
-        (restaurante) =>
-            restaurante.pais === pais &&
-            restaurante.ciudad === ciudad
-    );
+export const filterMenuItemsByCategory = (
+  items: MenuItem[],
+  category: MenuCategory
+): MenuItem[] => {
+  return items.filter((item) => item.category === category);
 };
 
-export const filtrarRegistrosPorPais = (
-    registros: RegistroBrasaPoints[],
-    pais: Pais
-): RegistroBrasaPoints[] => {
-    return registros.filter(
-        (registro) => registro.pais === pais
-    );
+export const filterActiveLocations = (
+  locations: Location[]
+): Location[] => {
+  return locations.filter((location) => location.status === "Active");
 };
 
-export const filtrarRegistrosConOfertasEmail = (
-    registros: RegistroBrasaPoints[]
-): RegistroBrasaPoints[] => {
-    return registros.filter(
-        (registro) => registro.recibirOfertasEmail
-    );
+export const sortLocationsByCapacity = (
+  locations: Location[],
+  order: "asc" | "desc"
+): Location[] => {
+  return [...locations].sort((a, b) => {
+    const comparison = a.seatingCapacity - b.seatingCapacity;
+
+    return order === "asc" ? comparison : -comparison;
+  });
 };
 
-export const ordenarRestaurantesPorNombre = (
-    restaurantes: Restaurante[],
-    orden: "asc" | "desc" = "asc"
-): Restaurante[] => {
-    return [...restaurantes].sort((a, b) => {
-        const comparacion = a.nombre.localeCompare(b.nombre);
+export const sortMenuItemsByPrice = (
+  items: MenuItem[],
+  currency: "USD" | "COP",
+  order: "asc" | "desc"
+): MenuItem[] => {
+  return [...items].sort((a, b) => {
+    const aPrice = currency === "USD" ? a.basePrice.USD : a.basePrice.COP;
+    const bPrice = currency === "USD" ? b.basePrice.USD : b.basePrice.COP;
+    const comparison = aPrice - bPrice;
 
-        return orden === "asc"
-            ? comparacion
-            : -comparacion;
-    });
-};
-
-export const ordenarRestaurantesPorPaisYCiudad = (
-    restaurantes: Restaurante[]
-): Restaurante[] => {
-    return [...restaurantes].sort((a, b) => {
-        const comparacionPais =
-            a.pais.localeCompare(b.pais);
-
-        if (comparacionPais !== 0) {
-            return comparacionPais;
-        }
-
-        return a.ciudad.localeCompare(b.ciudad);
-    });
-};
-
-export const agruparRestaurantesPorCiudad = (
-    restaurantes: Restaurante[]
-): Partial<Record<Ciudad, Restaurante[]>> => {
-    return restaurantes.reduce(
-        (grupos, restaurante) => {
-            const ciudad = restaurante.ciudad;
-
-            if (!grupos[ciudad]) {
-                grupos[ciudad] = [];
-            }
-
-            grupos[ciudad]?.push(restaurante);
-
-            return grupos;
-        },
-        {} as Partial<Record<Ciudad, Restaurante[]>>
-    );
+    return order === "asc" ? comparison : -comparison;
+  });
 };

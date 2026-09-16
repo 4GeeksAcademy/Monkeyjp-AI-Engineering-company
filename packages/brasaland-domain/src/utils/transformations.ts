@@ -1,194 +1,278 @@
 import {
-    Ciudad,
-    Pais,
-    RegistroBrasaPoints,
-    Restaurante,
-    ResumenEdades
+  CountryMetrics,
+  Location,
+  MenuItem,
+  PaymentMethod,
+  SaleTransaction,
+  WasteReason,
+  WasteRecord
 } from "../types/models";
 
-export const contarRestaurantesPorPais = (
-    restaurantes: Restaurante[]
-): Record<Pais, number> => {
-    return restaurantes.reduce(
-        (conteo, restaurante) => {
-            conteo[restaurante.pais]++;
-
-            return conteo;
-        },
-        {
-            Colombia: 0,
-            "Estados Unidos": 0
-        } as Record<Pais, number>
-    );
-};
-
-export const contarRestaurantesPorCiudad = (
-    restaurantes: Restaurante[]
-): Partial<Record<Ciudad, number>> => {
-    return restaurantes.reduce(
-        (conteo, restaurante) => {
-            const ciudad = restaurante.ciudad;
-
-            conteo[ciudad] =
-                (conteo[ciudad] ?? 0) + 1;
-
-            return conteo;
-        },
-        {} as Partial<Record<Ciudad, number>>
-    );
-};
-
-export const contarRegistrosPorPais = (
-    registros: RegistroBrasaPoints[]
-): Record<Pais, number> => {
-    return registros.reduce(
-        (conteo, registro) => {
-            conteo[registro.pais]++;
-
-            return conteo;
-        },
-        {
-            Colombia: 0,
-            "Estados Unidos": 0
-        } as Record<Pais, number>
-    );
-};
-
-export const calcularEdad = (
-    fechaNacimiento: string,
-    fechaReferencia: Date
+export const calculateDailyRevenue = (
+  sales: SaleTransaction[],
+  date: Date,
+  currency: "USD" | "COP"
 ): number => {
-    const [anio, mes, dia] =
-        fechaNacimiento.split("-").map(Number);
+  const revenue = sales
+    .filter((sale) => {
+      const saleDate = new Date(sale.timestamp);
+      return (
+        saleDate.getFullYear() === date.getFullYear() &&
+        saleDate.getMonth() === date.getMonth() &&
+        saleDate.getDate() === date.getDate()
+      );
+    })
+    .reduce((total, sale) => {
+      const saleAmount = currency === "USD" ? sale.totalPrice.USD : sale.totalPrice.COP;
+      return total + saleAmount;
+    }, 0);
 
-    let edad =
-        fechaReferencia.getFullYear() - anio;
-
-    const mesActual =
-        fechaReferencia.getMonth() + 1;
-
-    const diaActual =
-        fechaReferencia.getDate();
-
-    if (
-        mesActual < mes ||
-        (mesActual === mes && diaActual < dia)
-    ) {
-        edad--;
-    }
-
-    return edad;
+  return Number(revenue.toFixed(2));
 };
 
-export const sumarEdades = (
-    registros: RegistroBrasaPoints[],
-    fechaReferencia: Date
+export const calculateLocationMargin = (
+  sales: SaleTransaction[],
+  menuItems: MenuItem[],
+  locationId: string,
+  currency: "USD" | "COP"
 ): number => {
-    return registros.reduce(
-        (total, registro) =>
-            total +
-            calcularEdad(
-                registro.fechaNacimiento,
-                fechaReferencia
-            ),
-        0
-    );
+  const locationSales = sales.filter((sale) => sale.locationId === locationId);
+
+  const totalRevenue = locationSales.reduce((total, sale) => {
+    const saleAmount = currency === "USD" ? sale.totalPrice.USD : sale.totalPrice.COP;
+    return total + saleAmount;
+  }, 0);
+
+  if (totalRevenue === 0) {
+    return 0;
+  }
+
+  const ingredientCost = locationSales.reduce((total, sale) => {
+    const menuItem = menuItems.find((item) => item.id === sale.itemId);
+    if (!menuItem) {
+      return total;
+    }
+
+    const costPerUnit = currency === "USD" ? menuItem.ingredientCost.USD : menuItem.ingredientCost.COP;
+    return total + costPerUnit * sale.quantity;
+  }, 0);
+
+  const margin = ((totalRevenue - ingredientCost) / totalRevenue) * 100;
+  return Number(margin.toFixed(2));
 };
 
-export const calcularEdadPromedio = (
-    registros: RegistroBrasaPoints[],
-    fechaReferencia: Date
+export const calculateWasteCost = (
+  wasteRecords: WasteRecord[],
+  locationId: string,
+  currency: "USD" | "COP"
 ): number => {
-    if (registros.length === 0) {
-        return 0;
-    }
+  const totalCost = wasteRecords
+    .filter((record) => record.locationId === locationId)
+    .reduce((total, record) => {
+      const costAmount = currency === "USD" ? record.cost.USD : record.cost.COP;
+      return total + costAmount;
+    }, 0);
 
-    const total =
-        sumarEdades(registros, fechaReferencia);
-
-    const promedio = total / registros.length;
-
-    return Number(promedio.toFixed(2));
+  return Number(totalCost.toFixed(2));
 };
 
-export const obtenerEdadMinima = (
-    registros: RegistroBrasaPoints[],
-    fechaReferencia: Date
-): number | null => {
-    if (registros.length === 0) {
-        return null;
-    }
+export const convertCurrency = (
+  amount: number,
+  fromCurrency: "USD" | "COP",
+  toCurrency: "USD" | "COP"
+): number => {
+  if (fromCurrency === toCurrency) {
+    return amount;
+  }
 
-    const edades = registros.map(
-        (registro) =>
-            calcularEdad(
-                registro.fechaNacimiento,
-                fechaReferencia
-            )
+  const convertedAmount =
+    fromCurrency === "USD"
+      ? amount * 4000
+      : amount / 4000;
+
+  return Number(convertedAmount.toFixed(2));
+};
+
+export const scoreLocationPerformance = (
+  location: Location,
+  sales: SaleTransaction[],
+  wasteRecords: WasteRecord[],
+  menuItems: MenuItem[]
+): number => {
+  const locationSales = sales.filter((sale) => sale.locationId === location.id);
+
+  const totalRevenue = locationSales.reduce((total, sale) => {
+    const saleAmount = sale.totalPrice.USD;
+    return total + saleAmount;
+  }, 0);
+
+  const openingDate = new Date(Date.UTC(location.openingYear, 0, 1));
+  const currentDate = new Date();
+  const operatingDays = Math.max(
+    Math.floor((currentDate.getTime() - openingDate.getTime()) / (1000 * 60 * 60 * 24)),
+    1
+  );
+
+  const dailyAverageRevenue = totalRevenue / operatingDays;
+  const revenueScore = Math.min((dailyAverageRevenue / 1000) * 40, 40);
+
+  const totalSalesCount = locationSales.length;
+  const efficiencyScore = Math.min((totalSalesCount / location.seatingCapacity) * 30, 30);
+
+  const totalWasteCost = wasteRecords
+    .filter((record) => record.locationId === location.id)
+    .reduce((total, record) => total + record.cost.USD, 0);
+
+  const wastePercentage = totalRevenue === 0 ? 0 : (totalWasteCost / totalRevenue) * 100;
+  const wasteScore = Math.max(20 - wastePercentage * 2, 0);
+
+  const marginScore = Math.min(calculateLocationMargin(sales, menuItems, location.id, "USD") / 10, 10);
+
+  const totalScore = revenueScore + efficiencyScore + wasteScore + marginScore;
+  return Number(Math.min(totalScore, 100).toFixed(2));
+};
+
+export const rankLocationsByPerformance = (
+  locations: Location[],
+  sales: SaleTransaction[],
+  wasteRecords: WasteRecord[],
+  menuItems: MenuItem[]
+): Array<{ location: Location; score: number }> => {
+  return locations
+    .map((location) => ({
+      location,
+      score: scoreLocationPerformance(location, sales, wasteRecords, menuItems)
+    }))
+    .sort((a, b) => b.score - a.score);
+};
+
+export const countSalesByPaymentMethod = (
+  sales: SaleTransaction[]
+): Record<PaymentMethod, number> => {
+  const counts: Record<PaymentMethod, number> = {
+    Cash: 0,
+    "Credit card": 0,
+    "Debit card": 0,
+    "Digital wallet": 0
+  };
+
+  sales.forEach((sale) => {
+    counts[sale.paymentMethod] += 1;
+  });
+
+  return counts;
+};
+
+export const calculateAverageTicket = (
+  sales: SaleTransaction[],
+  currency: "USD" | "COP"
+): number => {
+  if (sales.length === 0) {
+    return 0;
+  }
+
+  const totalRevenue = sales.reduce((total, sale) => {
+    const saleAmount = currency === "USD" ? sale.totalPrice.USD : sale.totalPrice.COP;
+    return total + saleAmount;
+  }, 0);
+
+  return Number((totalRevenue / sales.length).toFixed(2));
+};
+
+export const findTopSellingItems = (
+  sales: SaleTransaction[],
+  menuItems: MenuItem[],
+  topN: number
+): Array<{ item: MenuItem; totalSold: number }> => {
+  const totalByItem = sales.reduce<Record<string, number>>((acc, sale) => {
+    acc[sale.itemId] = (acc[sale.itemId] ?? 0) + sale.quantity;
+    return acc;
+  }, {});
+
+  return menuItems
+    .map((item) => ({
+      item,
+      totalSold: totalByItem[item.id] ?? 0
+    }))
+    .filter(({ totalSold }) => totalSold > 0)
+    .sort((a, b) => b.totalSold - a.totalSold)
+    .slice(0, topN);
+};
+
+export const groupWasteByReason = (
+  wasteRecords: WasteRecord[]
+): Record<WasteReason, WasteRecord[]> => {
+  const groups: Record<WasteReason, WasteRecord[]> = {
+    Expired: [],
+    "Cooking error": [],
+    "Customer return": [],
+    Damage: [],
+    Other: []
+  };
+
+  wasteRecords.forEach((record) => {
+    groups[record.reason].push(record);
+  });
+
+  return groups;
+};
+
+export const calculateCountryComparison = (
+  sales: SaleTransaction[],
+  locations: Location[],
+  menuItems: MenuItem[]
+): { Colombia: CountryMetrics; USA: CountryMetrics } => {
+  const countryMetrics: { Colombia: CountryMetrics; USA: CountryMetrics } = {
+    Colombia: {
+      totalLocations: 0,
+      totalRevenue: { USD: 0, COP: 0 },
+      averageRevenuePerLocation: { USD: 0, COP: 0 },
+      totalSales: 0
+    },
+    USA: {
+      totalLocations: 0,
+      totalRevenue: { USD: 0, COP: 0 },
+      averageRevenuePerLocation: { USD: 0, COP: 0 },
+      totalSales: 0
+    }
+  };
+
+  const countryLocations: Record<"Colombia" | "USA", Location[]> = {
+    Colombia: locations.filter((location) => location.country === "Colombia"),
+    USA: locations.filter((location) => location.country === "USA")
+  };
+
+  for (const country of ["Colombia", "USA"] as const) {
+    const countryLocationList = countryLocations[country];
+    const countrySales = sales.filter((sale) => {
+      const location = countryLocationList.find((item) => item.id === sale.locationId);
+      return Boolean(location);
+    });
+
+    const totalRevenue = countrySales.reduce(
+      (acc, sale) => {
+        acc.USD += sale.totalPrice.USD;
+        acc.COP += sale.totalPrice.COP;
+        return acc;
+      },
+      { USD: 0, COP: 0 }
     );
 
-    return Math.min(...edades);
-};
+    const totalLocations = countryLocationList.length;
+    const averageRevenuePerLocation = totalLocations === 0
+      ? { USD: 0, COP: 0 }
+      : {
+          USD: Number((totalRevenue.USD / totalLocations).toFixed(2)),
+          COP: Number((totalRevenue.COP / totalLocations).toFixed(2))
+        };
 
-export const obtenerEdadMaxima = (
-    registros: RegistroBrasaPoints[],
-    fechaReferencia: Date
-): number | null => {
-    if (registros.length === 0) {
-        return null;
-    }
-
-    const edades = registros.map(
-        (registro) =>
-            calcularEdad(
-                registro.fechaNacimiento,
-                fechaReferencia
-            )
-    );
-
-    return Math.max(...edades);
-};
-
-export const generarResumenEdades = (
-    registros: RegistroBrasaPoints[],
-    fechaReferencia: Date
-): ResumenEdades => {
-    return {
-        total: sumarEdades(
-            registros,
-            fechaReferencia
-        ),
-
-        promedio: calcularEdadPromedio(
-            registros,
-            fechaReferencia
-        ),
-
-        minima: obtenerEdadMinima(
-            registros,
-            fechaReferencia
-        ),
-
-        maxima: obtenerEdadMaxima(
-            registros,
-            fechaReferencia
-        )
+    countryMetrics[country] = {
+      totalLocations,
+      totalRevenue,
+      averageRevenuePerLocation,
+      totalSales: countrySales.length
     };
-};
+  }
 
-export const calcularPorcentajeOfertasEmail = (
-    registros: RegistroBrasaPoints[]
-): number => {
-    if (registros.length === 0) {
-        return 0;
-    }
-
-    const aceptanOfertas = registros.filter(
-        (registro) => registro.recibirOfertasEmail
-    ).length;
-
-    const porcentaje =
-        (aceptanOfertas / registros.length) * 100;
-
-    return Number(porcentaje.toFixed(2));
+  return countryMetrics;
 };
