@@ -2,6 +2,8 @@ export * from "./types/models";
 
 export * from "./types/operations";
 
+export * from "./operations/collections";
+
 export * from "./data/restaurants";
 
 export * from "./utils/collections";
