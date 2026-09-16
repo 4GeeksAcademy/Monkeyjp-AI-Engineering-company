@@ -6,7 +6,7 @@ Milestone 6 — Brasaland Incident Analysis
 
 ## Current Objective
 
-Phase 1 (CLI validation and summary of the incident-report CSV) is complete. Phase 2 (FastAPI endpoints and backoffice UI reuse) is pending.
+Phase 1 (CLI validation and summary of the incident-report CSV) and Phase 2 (FastAPI backend integration) are complete. Backoffice UI integration is pending.
 
 ## Completed
 
@@ -77,6 +77,19 @@ Phase 1 (CLI validation and summary of the incident-report CSV) is complete. Pha
 - Added CSV summary export (`metric,value,percentage`) to a deterministic `results.csv` filename via an interactive y/n prompt.
 - Phase 2 (FastAPI endpoints exposing this logic and backoffice UI integration) is not yet implemented.
 
+### Milestone 6 — Brasaland Incident Analysis (Phase 2)
+
+- Created the central backend service at `services/api/` (FastAPI), following the Layered Modular Monolith direction from `docs/ARCHITECTURE_PROPOSAL.md`, scoped to only what Phase 2 needs (no `core/`, no database).
+- Added the `incidents` domain (`router.py`, `schemas.py`, `service.py`, `repository.py`) exposing:
+  - `POST /api/incidents/analyze` — multipart CSV upload, returns the analysis summary as JSON.
+  - `GET /api/incidents/results/export` — exports the most recent analysis as CSV (`metric,value,percentage`); returns `404` if no analysis has been run yet.
+- Reused `packages/incident_analysis` directly (`analyze`, `build_export_rows`) with no duplicated validation, aggregation, or export logic; the package remains transport-agnostic and was not modified.
+- Upload handling verifies required CSV headers and delegates all record-level/business validation to `packages/incident_analysis`.
+- Added a simple in-memory, process-local "latest analysis result" store (`repository.py`). This state is lost on restart and is not shared across multiple worker processes; persistence is explicitly out of scope for this milestone.
+- Added new dependencies (approved): `fastapi`, `uvicorn`, `python-multipart`, recorded in `services/api/requirements.txt`.
+- CORS is intentionally not configured yet; deferred until the backoffice frontend origin is known.
+- Verified end-to-end against the provided 100-row fixture: `POST /api/incidents/analyze` returns 100 total / 96 valid / 4 invalid with matching category, status, and satisfaction figures (average 3.46); `GET /api/incidents/results/export` returns the matching CSV; export before any analysis returns `404`; malformed/empty uploads return `400`.
+
 ## Known Issues
 
 - A browser console Web Vitals `reportAllChanges` / `startTime` TypeError may occur intermittently during client-side navigation.
@@ -91,7 +104,8 @@ Phase 1 (CLI validation and summary of the incident-report CSV) is complete. Pha
 
 1. Investigate the browser console Web Vitals-related error during client-side navigation.
 2. Continue maintenance and focused UX improvements for the Talent Pipeline Tracker.
-3. Implement Brasaland Incident Analysis Phase 2: FastAPI endpoints exposing `packages/incident_analysis`, and backoffice UI integration.
+3. Integrate the Brasaland backoffice UI with the `services/api` incidents endpoints; configure CORS once the frontend origin is known.
+4. Revisit the in-memory latest-result store if multi-worker or persistent state becomes necessary.
 
 ## Notes
 
@@ -149,3 +163,7 @@ Created the technical proposal for Brasaland's centralized backend under `docs/A
 ### 2026-09-16 — Incident Analysis Phase 1
 
 Implemented the Brasaland Incident Analysis CLI (`scripts/analyze.py`) with its reusable validation/aggregation logic placed under `packages/incident_analysis/`, following the repository convention that shared libraries live in `/packages` so the future FastAPI backend can reuse it without duplication. Used the Python standard library only (no new external dependency). Validated the implementation against the provided 100-row fixture with all expected numbers matching exactly.
+
+### 2026-09-16 — Incident Analysis Phase 2 (Backend)
+
+Stood up the first backend service, `services/api/` (FastAPI), as the central API per `docs/ARCHITECTURE_PROPOSAL.md`'s Layered Modular Monolith direction, scoped to only the `incidents` domain for this milestone (no `core/`, no database). Exposed `POST /api/incidents/analyze` and `GET /api/incidents/results/export` without an `/api/v1` prefix, per the milestone's explicit API contract taking precedence over the proposal's future versioning. Reused `packages/incident_analysis` directly with no logic duplication and without modifying it or the CLI. Added `fastapi`, `uvicorn`, and `python-multipart` as the repository's first Python dependencies (developer-approved). Latest-analysis state uses a simple in-memory, process-local store — accepted limitation for this milestone, no persistence or multi-worker support. CORS deferred until the backoffice frontend origin is known.
