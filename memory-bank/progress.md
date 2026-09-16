@@ -2,11 +2,11 @@
 
 ## Current Milestone
 
-Milestone 5 — Backend Architecture Proposal
+Milestone 6 — Brasaland Incident Analysis
 
 ## Current Objective
 
-Document the proposed architecture for Brasaland's centralized FastAPI backend in `docs/ARCHITECTURE_PROPOSAL.md`, defining its architectural pattern, domain boundaries, module organization, frontend/backend communication, and key technical risks.
+Phase 1 (CLI validation and summary of the incident-report CSV) is complete. Phase 2 (FastAPI endpoints and backoffice UI reuse) is pending.
 
 ## Completed
 
@@ -67,6 +67,16 @@ Document the proposed architecture for Brasaland's centralized FastAPI backend i
 - Analyzed technical risks (fat routers, cross-domain coupling, validation drift, CORS configuration, data privacy).
 - Documented references to official FastAPI and Pydantic best practices.
 
+### Milestone 6 — Brasaland Incident Analysis (Phase 1)
+
+- Added the milestone context under `docs/incidents-analysis/` (English and Spanish).
+- Implemented a standard-library-only CLI at `scripts/analyze.py` that reads an incidents CSV path argument.
+- Implemented reusable, I/O-free validation and aggregation logic in `packages/incident_analysis/` (`models.py`, `validation.py`, `metrics.py`, `report.py`), intended for later reuse by `services/api` without duplication.
+- Validation covers all required fields (`incident_id`, `date`, `location_id`, `category`, `description`, `status`, `reporter_id`), invalid/missing category and status values, short descriptions, closed cases missing a satisfaction score, and out-of-range scores; invalid records are excluded from aggregates but each triggered rule is counted, while the record itself counts once toward the total invalid count.
+- Verified against the provided 100-row fixture (`scripts/incidents-brasaland.csv`): 100 total, 96 valid, 4 invalid, category/status breakdowns, and satisfaction average of 3.46 all match the milestone's expected results exactly.
+- Added CSV summary export (`metric,value,percentage`) to a deterministic `results.csv` filename via an interactive y/n prompt.
+- Phase 2 (FastAPI endpoints exposing this logic and backoffice UI integration) is not yet implemented.
+
 ## Known Issues
 
 - A browser console Web Vitals `reportAllChanges` / `startTime` TypeError may occur intermittently during client-side navigation.
@@ -81,6 +91,7 @@ Document the proposed architecture for Brasaland's centralized FastAPI backend i
 
 1. Investigate the browser console Web Vitals-related error during client-side navigation.
 2. Continue maintenance and focused UX improvements for the Talent Pipeline Tracker.
+3. Implement Brasaland Incident Analysis Phase 2: FastAPI endpoints exposing `packages/incident_analysis`, and backoffice UI integration.
 
 ## Notes
 
@@ -134,3 +145,7 @@ Completed the core candidate management workflows, responsive People & Talent UI
 ### 2026-09-14 — Backend Architecture Proposal
 
 Created the technical proposal for Brasaland's centralized backend under `docs/ARCHITECTURE_PROPOSAL.md`. Selected a Layered Modular Monolith pattern implemented in FastAPI, defining initial business domains (`locations`, `loyalty`, `talent`), transversal core capabilities, separated transport/service/repository layers, and decoupled frontend-backend communication via HTTP/JSON with CORS policies.
+
+### 2026-09-16 — Incident Analysis Phase 1
+
+Implemented the Brasaland Incident Analysis CLI (`scripts/analyze.py`) with its reusable validation/aggregation logic placed under `packages/incident_analysis/`, following the repository convention that shared libraries live in `/packages` so the future FastAPI backend can reuse it without duplication. Used the Python standard library only (no new external dependency). Validated the implementation against the provided 100-row fixture with all expected numbers matching exactly.
