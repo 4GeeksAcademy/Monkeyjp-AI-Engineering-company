@@ -55,6 +55,10 @@ Milestone 6 — Brasaland Incident Analysis
 - Public Website
 - Domain Models & TypeScript Utilities
 - Talent Pipeline Tracker
+  - Aligned with the official Milestone 3 context.
+  - Status and stage UI labels match the required human-readable values.
+  - Milestone-specific context and agent rules are documented.
+  - Lint and build pass.
 - Backend Architecture Proposal
 - Incident Analysis Phase 1
 - Incident Analysis Phase 2 backend
