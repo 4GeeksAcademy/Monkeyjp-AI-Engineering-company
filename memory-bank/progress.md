@@ -12,6 +12,9 @@ Milestone 6 — Brasaland Incident Analysis
 - Shared incident validation and aggregation logic implemented in `packages/incident_analysis/`.
 - FastAPI incident endpoints implemented in `services/api`.
 - Backoffice incident-analysis UI integrated with the API.
+- Backoffice migrated from static HTML/JavaScript to Next.js, React, TypeScript and Tailwind CSS.
+- Backoffice API configuration moved to `NEXT_PUBLIC_API_URL`.
+- `.env.local` is used for local or Codespaces-specific values and `.env.example` documents the required configuration.
 - CSV upload, analysis rendering and CSV export verified end-to-end.
 - Provided 100-row fixture produces the expected 96 valid / 4 invalid result and satisfaction average of 3.46.
 
@@ -21,15 +24,15 @@ Milestone 6 — Brasaland Incident Analysis
 - State is lost when the API restarts and is not shared between multiple workers.
 - Persistence is outside the current milestone scope.
 - Browser access from GitHub Codespaces requires the forwarded API port to be accessible to the frontend.
-- Frontend API configuration must not permanently contain a user-specific Codespaces URL.
+- The backoffice reads its API base URL from `NEXT_PUBLIC_API_URL`.
 
 ## Open Tasks
 
-- Finalize environment-safe API base URL configuration for the backoffice.
 - Confirm CORS configuration is committed and limited to appropriate development origins.
 - Run final milestone validation.
 - Capture required CLI and UI screenshots.
 - Prepare final commit/push/PR.
+- Migrate `uis/website` from static HTML/JavaScript to Next.js, React, TypeScript and Tailwind CSS.
 
 ## Active Architectural Decisions
 
@@ -38,6 +41,9 @@ Milestone 6 — Brasaland Incident Analysis
 - Incident business logic remains in `packages/incident_analysis` and is shared by CLI and API.
 - Explicit milestone API contracts take precedence over proposed future route conventions.
 - Incident result persistence remains intentionally in-memory for this milestone.
+- Brasaland frontend applications are converging on Next.js, React, TypeScript and Tailwind CSS.
+- `uis/backoffice` has migrated to the target frontend stack.
+- `uis/website` remains on the legacy static stack until its migration is completed.
 
 ## Known Issues
 
