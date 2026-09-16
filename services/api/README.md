@@ -1,22 +1,116 @@
-# `services/api`
+# `services/api` — Brasaland API
 
-Brasaland centralized backend API (FastAPI). Currently exposes the Incident Analysis domain only (Phase 2 of the Brasaland Incident Analysis milestone).
+Centralized Brasaland backend built with FastAPI.
 
-## Run locally
+The service currently exposes the Incident Analysis domain.
 
-```bash
-cd services/api
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+## Technology
+
+- Python
+- FastAPI
+- Uvicorn
+
+Dependencies are defined in:
+
+`requirements.txt`
+
+## Structure
+
+```text
+app/
+├── main.py
+└── domains/
+    └── incidents/
+        ├── router.py
+        ├── schemas.py
+        ├── service.py
+        └── repository.py
 ```
+
+The incidents domain reuses shared business logic from:
+
+`packages/incident_analysis`
+
+Do not duplicate incident validation, aggregation, or export logic inside the API.
+
+## Run Locally
+
+From the repository root:
+
+    cd services/api
+    pip install -r requirements.txt
+    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+The API documentation is available through FastAPI's `/docs` endpoint while the service is running.
 
 ## Endpoints
 
-- `POST /api/incidents/analyze` — multipart upload of an incidents CSV (`file` field). Validates and analyzes it using the reusable `packages/incident_analysis` logic and returns the summary as JSON. Stores the result as the "latest analysis" for the current process.
-- `GET /api/incidents/results/export` — exports the most recent analysis as CSV (`metric,value,percentage`). Returns `404` if no analysis has been run yet in this process.
+### Analyze Incidents
 
-## Notes
+`POST /api/incidents/analyze`
 
-- Business validation and aggregation logic is not duplicated here — it lives entirely in [`packages/incident_analysis`](../../packages/incident_analysis/README.md). This service only handles HTTP transport, upload parsing, and response formatting.
-- The "latest analysis" state is a simple in-memory, process-local store for this milestone: it is lost on restart and is not shared across multiple worker processes. Persistence (database or disk) is out of scope for this milestone.
-- CORS is intentionally not configured yet; it will be added once the backoffice integration defines the actual frontend origin.
+Accepts an incidents CSV as multipart form data using the `file` field.
+
+The endpoint:
+
+- parses the uploaded CSV
+- validates the required CSV structure
+- delegates record validation and analysis to `packages/incident_analysis`
+- returns the analysis summary as JSON
+- stores the result as the latest analysis for the current process
+
+### Export Latest Analysis
+
+`GET /api/incidents/results/export`
+
+Exports the latest successful analysis as CSV using:
+
+`metric,value,percentage`
+
+Returns `404` when no analysis is available in the current process.
+
+## State
+
+The latest analysis is stored in memory.
+
+This means:
+
+- state is lost when the API restarts
+- state is process-local
+- multiple workers do not share the same result
+
+Persistent storage is currently outside the milestone scope.
+
+## CORS
+
+CORS is configured for the frontend development environments required by the backoffice integration.
+
+Do not use unrestricted production origins.
+
+Production CORS configuration should use explicitly approved Brasaland origins.
+
+## Validation
+
+For incident API changes, verify:
+
+- valid CSV upload returns the expected analysis
+- malformed or empty CSV uploads return an appropriate client error
+- export returns the latest analysis
+- export without a previous analysis returns `404`
+- the provided milestone fixture produces the expected metrics
+
+## Related Documentation
+
+Incident milestone requirements:
+
+`docs/incidents-analysis/CONTEXT-brasaland.md`
+
+Shared incident logic:
+
+`packages/incident_analysis/README.md`
+
+Architecture decisions:
+
+`docs/ARCHITECTURE_PROPOSAL.md`
+
+Read the architecture proposal only when the task has architectural implications.

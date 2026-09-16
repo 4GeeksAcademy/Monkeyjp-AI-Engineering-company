@@ -115,6 +115,15 @@
                             Prioridades
                         </a>
                     </li>
+
+                    <li>
+                        <a
+                            href="#incidents"
+                            class="block rounded-lg px-4 py-3 font-semibold text-stone-300 transition hover:bg-stone-800 hover:text-white"
+                        >
+                            Análisis de Incidentes
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </aside>
@@ -377,8 +386,190 @@
                         </ul>
                     </div>
                 </section>
+
+                <section
+                    id="incidents"
+                    class="mt-10"
+                    aria-labelledby="incidents-title"
+                >
+                    <div class="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+                        <p class="font-bold text-brasa-700">
+                            Operaciones
+                        </p>
+
+                        <h2
+                            id="incidents-title"
+                            class="mt-1 text-2xl font-black text-stone-950"
+                        >
+                            Análisis de Incidentes
+                        </h2>
+
+                        <p class="mt-3 max-w-3xl text-stone-600">
+                            Carga el reporte mensual de incidentes en formato
+                            CSV para validar los registros y obtener un
+                            resumen operativo.
+                        </p>
+
+                        <form
+                            id="incidents-form"
+                            class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end"
+                        >
+                            <div class="flex-1">
+                                <label
+                                    for="incidents-file-input"
+                                    class="block text-sm font-bold text-stone-700"
+                                >
+                                    Archivo CSV de incidentes
+                                </label>
+
+                                <input
+                                    id="incidents-file-input"
+                                    name="file"
+                                    type="file"
+                                    accept=".csv,text/csv"
+                                    required
+                                    class="mt-2 block w-full rounded-lg border border-stone-300 px-4 py-2 text-stone-900 file:mr-4 file:rounded-md file:border-0 file:bg-brasa-600 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-brasa-700"
+                                />
+                            </div>
+
+                            <button
+                                id="incidents-analyze-button"
+                                type="submit"
+                                class="rounded-lg bg-brasa-600 px-6 py-2.5 font-semibold text-white transition hover:bg-brasa-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Analizar
+                            </button>
+
+                            <button
+                                id="incidents-export-button"
+                                type="button"
+                                disabled
+                                class="rounded-lg border border-stone-300 px-6 py-2.5 font-semibold text-stone-700 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Descargar resumen CSV
+                            </button>
+                        </form>
+
+                        <p
+                            id="incidents-status"
+                            class="mt-4 hidden text-sm font-semibold"
+                            role="status"
+                        ></p>
+
+                        <div
+                            id="incidents-empty-state"
+                            class="mt-8 rounded-xl border border-dashed border-stone-300 p-6 text-center text-stone-500"
+                        >
+                            Carga un archivo CSV para ver el resumen del
+                            análisis.
+                        </div>
+
+                        <div id="incidents-results" class="mt-8 hidden">
+                            <p
+                                id="incidents-invalid-warning"
+                                class="hidden rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 font-semibold text-amber-800"
+                                role="alert"
+                            ></p>
+
+                            <div class="mt-6 grid gap-5 sm:grid-cols-3">
+                                <article class="rounded-xl border border-stone-200 p-5">
+                                    <p class="text-sm font-bold uppercase tracking-wide text-stone-500">
+                                        Total de registros
+                                    </p>
+                                    <p
+                                        id="incidents-total"
+                                        class="mt-2 text-4xl font-black text-stone-950"
+                                    >
+                                        0
+                                    </p>
+                                </article>
+
+                                <article class="rounded-xl border border-stone-200 p-5">
+                                    <p class="text-sm font-bold uppercase tracking-wide text-stone-500">
+                                        Válidos
+                                    </p>
+                                    <p
+                                        id="incidents-valid"
+                                        class="mt-2 text-4xl font-black text-green-700"
+                                    >
+                                        0
+                                    </p>
+                                </article>
+
+                                <article class="rounded-xl border border-stone-200 p-5">
+                                    <p class="text-sm font-bold uppercase tracking-wide text-stone-500">
+                                        Inválidos
+                                    </p>
+                                    <p
+                                        id="incidents-invalid"
+                                        class="mt-2 text-4xl font-black text-red-700"
+                                    >
+                                        0
+                                    </p>
+                                </article>
+                            </div>
+
+                            <div class="mt-8 grid gap-6 lg:grid-cols-2">
+                                <div>
+                                    <h3 class="text-lg font-black text-stone-950">
+                                        Detalle de registros inválidos
+                                    </h3>
+                                    <ul
+                                        id="incidents-invalid-breakdown"
+                                        class="mt-3 space-y-2"
+                                    ></ul>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-lg font-black text-stone-950">
+                                        Por categoría (registros válidos)
+                                    </h3>
+                                    <ul
+                                        id="incidents-category-breakdown"
+                                        class="mt-3 space-y-2"
+                                    ></ul>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-lg font-black text-stone-950">
+                                        Por estado (registros válidos)
+                                    </h3>
+                                    <ul
+                                        id="incidents-status-breakdown"
+                                        class="mt-3 space-y-2"
+                                    ></ul>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-lg font-black text-stone-950">
+                                        Índice de satisfacción (casos
+                                        cerrados)
+                                    </h3>
+                                    <p class="mt-3 text-stone-600">
+                                        Promedio:
+                                        <span
+                                            id="incidents-satisfaction-average"
+                                            class="font-black text-stone-950"
+                                        >0.00</span>
+                                        / 5.00 · Con puntaje:
+                                        <span
+                                            id="incidents-satisfaction-scored"
+                                            class="font-black text-stone-950"
+                                        >0 de 0</span>
+                                    </p>
+                                    <ul
+                                        id="incidents-satisfaction-breakdown"
+                                        class="mt-3 space-y-2"
+                                    ></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
         </div>
     </div>
+
+    <script src="incidents.js"></script>
 </body>
 </html>

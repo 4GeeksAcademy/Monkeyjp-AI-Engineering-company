@@ -1,8 +1,34 @@
-# `scripts` folder
+# `scripts` — Helper Scripts
 
-This folder contains **helper scripts** for the monorepo: development automation, maintenance utilities, repetitive tasks (setup, lint, migrations, data generation, etc.), and internal tooling.
+This directory contains repository-level helper scripts and internal utilities that do not belong to a specific application, service, or package.
 
-- **Main purpose**: group support tools that do not belong to a specific app, agent, or pipeline but make the team’s work easier.
-- **Recommendation**: document each script (what it does, parameters, requirements, usage examples) and keep them reproducible (and safe) across environments.
+## Purpose
+
+Use this directory for scripts such as:
+
+- development automation
+- maintenance utilities
+- data-processing helpers
+- setup tasks
+- migration helpers
+- one-off operational tools
+
+Scripts should remain focused and reproducible across environments.
+
+## Documentation
+
+Each script should document, either in its code or in this README:
+
+- purpose
+- required parameters
+- dependencies
+- expected input and output
+- usage example when useful
+
+## Current Scripts
+
+- `analyze.py` — analyzes Brasaland incident CSV files using shared logic from `packages/incident_analysis`.
+
+Do not duplicate business logic inside scripts when a reusable package already provides it.
 
 > _Spanish version: [README.es.md](./README.es.md)._

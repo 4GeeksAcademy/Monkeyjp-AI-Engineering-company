@@ -1,29 +1,31 @@
 ---
-description: Development rules for Brasaland user-facing applications
+description: Shared frontend development rules for Brasaland user-facing applications
 globs:
-  - "uis/**/*.{js,jsx,ts,tsx,css}"
+  - "uis/**/*.{html,js,jsx,ts,tsx,css}"
 alwaysApply: false
 ---
 
-# Brasaland UI Development Rule
+# Brasaland Frontend Development Rules
 
 ## Scope
 
-This rule applies to frontend application files under:
+This rule applies to user-facing application files under:
 
 `uis/**`
 
-It governs:
+Application-specific requirements belong to their corresponding context, README, or scoped rule.
 
-- `uis/website`
-- `uis/backoffice`
-- `uis/talent-pipeline-tracker`
+Do not load or apply requirements from unrelated Brasaland applications.
 
 ## Business Alignment
 
-All user-visible business content must be consistent with the root `CONTEXT.md`.
+User-visible business content must be consistent with:
 
-Do not invent:
+1. Root `CONTEXT.md`
+2. The relevant milestone-specific context
+3. Existing centralized application data or the API assigned to the application
+
+Do not invent business facts such as:
 
 - restaurant locations
 - loyalty program rules
@@ -32,100 +34,62 @@ Do not invent:
 - operating countries
 - business capabilities
 
-When business data is needed, retrieve it from `CONTEXT.md`, an existing centralized application data source, or the API explicitly assigned to the application.
-
 ## Brasaland Terminology
 
-Use the official business names:
+Use official business names consistently:
 
 - Brasaland
 - Brasaland Digital
 - Brasa Points
 
-Do not rename Brasa Points to generic terms such as:
+Do not replace established Brasaland terminology with generic alternatives unless explicitly requested.
 
-- Rewards
-- Loyalty Club
-- Points Program
+## Application Independence
 
-unless explicitly requested.
+Applications under `uis/` must remain independent unless integration is explicitly required.
 
-## Public Website
+Do not:
 
-Files under:
+- reuse another application's layout by default
+- move application files between `uis/` projects
+- migrate an application to another framework
+- introduce another application's dependencies
 
-`uis/website/**`
-
-must represent the public Brasaland brand.
-
-Reusable components should be preferred for repeated UI patterns such as:
-
-- navigation
-- sections
-- cards
-- call-to-action elements
-- footer elements
-
-## Backoffice
-
-Files under:
-
-`uis/backoffice/**`
-
-must belong to the internal application.
-
-The backoffice must maintain its own layout and must not depend on the public website layout.
-
-The entry view must show useful Brasaland business information rather than generic dashboard placeholder text.
-
-## Talent Pipeline Tracker
-
-Files under:
-
-`uis/talent-pipeline-tracker/**`
-
-belong to Brasaland's internal People & Talent application.
-
-The application must remain independent from:
-
-- `uis/website`
-- `uis/backoffice`
-
-It should follow the technology stack required by the milestone and configured within its own application directory.
-
-Candidate and hiring-pipeline data must come from the provided Talent Tracker API.
-
-Do not invent candidate statuses, pipeline stages, field names or API behavior.
-
-Use the API documentation and existing project context as the source of truth.
-
-The interface must clearly communicate:
-
-- loading states
-- API errors
-- successful mutations
-
-Search and filtering interactions should not require a full page reload.
+without developer confirmation.
 
 ## Accessibility
 
 Frontend implementation should use:
 
 - semantic HTML
-- meaningful headings
+- meaningful heading structure
 - accessible buttons and links
 - visible keyboard focus
-- adequate text alternatives for meaningful images
 - labels for form controls
+- meaningful text alternatives for relevant images
 
 ## Styling
 
-Follow the styling technology already configured for each application.
+Follow the styling technology already configured for the application being modified.
 
-Do not introduce another CSS framework without developer confirmation.
+Do not introduce another CSS framework or styling system without developer confirmation.
+
+## Data and API Usage
+
+Use existing application data sources and APIs when available.
+
+Do not duplicate business rules already provided by:
+
+- a shared package
+- an assigned API
+- an existing centralized application data source
+
+Do not hardcode environment-specific API URLs when runtime or environment configuration is available.
 
 ## Change Discipline
 
-Do not refactor unrelated UI code while implementing a focused task.
+Keep changes focused on the requested task.
 
-Prefer the smallest change that satisfies the requirement.
+Do not refactor unrelated UI code.
+
+Prefer the smallest coherent change that satisfies the requirement.

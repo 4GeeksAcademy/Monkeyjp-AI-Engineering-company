@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Brasaland Talent Pipeline Tracker
 
-## Getting Started
+Internal People & Talent application for managing recruitment candidates and hiring pipeline activity.
 
-First, run the development server:
+## Purpose
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This application provides Brasaland's People & Talent team with a dedicated interface to:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- review candidate applications
+- search and filter candidates
+- inspect candidate details
+- update status and hiring stage
+- create and edit candidate applications
+- manage internal notes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The application is independent from:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `uis/website`
+- `uis/backoffice`
 
-## Learn More
+## Technology
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js
+- React
+- TypeScript
+- App Router
+- Tailwind CSS
+- ESLint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application consumes the external Talent Tracker REST API.
 
-## Deploy on Vercel
+Configure the API base URL through:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`NEXT_PUBLIC_API_URL`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Local development values belong in:
+
+`.env.local`
+
+A safe template may be documented in:
+
+`.env.example`
+
+Do not hardcode environment-specific API URLs in application code.
+
+## Run Locally
+
+From this directory:
+
+    npm install
+    npm run dev
+
+Then open:
+
+`http://localhost:3000`
+
+## Validation
+
+Run:
+
+    npm run lint
+    npm run build
+
+For functional changes, also verify the affected candidate workflow in the browser.
+
+## Development Notes
+
+- Keep the application independent from other Brasaland frontends.
+- Preserve the existing Next.js, React, TypeScript and Tailwind stack.
+- Use the assigned Talent Tracker API as the source of truth for candidate data and API behavior.
+- Do not invent candidate statuses, stages, fields or endpoint behavior.
+- Keep loading, success and error states visible to users.
+- Keep search and filtering interactions client-friendly and avoid unnecessary full page reloads.
+- Prefer local component state and framework hooks unless shared state is genuinely required.
+
+## Related Documentation
+
+Company-wide context:
+
+`CONTEXT.md`
+
+Development rules:
+
+`.agents/rules/talent-pipeline.md`

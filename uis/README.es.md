@@ -1,15 +1,38 @@
-# Carpeta `uis`
+# `uis` — Interfaces de Usuario
 
-Esta carpeta contiene **todos los proyectos con interfaz de usuario** para el proyecto transversal de AI Engineering de la compañía — por ejemplo: un sitio web público, un frontend de panel de administración, una interfaz de ecommerce, portales para clientes, aplicaciones Streamlit/Gradio u otras herramientas sólo-frontend.
+Este directorio contiene las aplicaciones con interfaz de usuario de Brasaland.
 
-Los dos proyectos principales que se almacenan aquí son:
+Cada subdirectorio representa una aplicación frontend independiente con su propia estructura, dependencias, configuración de ejecución y documentación.
 
-- **`website`** — la presencia web pública de la compañía.
-- **`backoffice`** — la aplicación interna de administración. Es el lugar ideal para desarrollar múltiples soluciones dentro de un mismo proyecto: autenticación, gestión de personas, gestión de operaciones, comunicación interna y otras capacidades de back-office.
+## Aplicaciones Actuales
 
-Organiza `uis/` por **distintas áreas de la compañía** — cada subcarpeta agrupa un ámbito diferente (por ejemplo, web pública frente a operaciones internas) e incluye su propia documentación técnica y funcional.
+- `website` — sitio web público de Brasaland.
+- `backoffice` — interfaz interna de operaciones.
+- `talent-pipeline-tracker` — aplicación interna de People & Talent.
 
-- **Propósito principal**: centralizar en un único lugar todas las aplicaciones frontend que dan soporte a los casos de uso de la compañía.
-- **Recomendación**: documenta en este archivo (o en sub-READMEs) las aplicaciones que vayas añadiendo, su objetivo, tecnología usada y cómo ejecutarlas.
+## Organización
 
-> _These instructions are also available in [English](./README.md)._
+Utiliza un subdirectorio por cada aplicación o área de negocio diferenciada.
+
+Las aplicaciones dentro de `uis/` deben permanecer independientes salvo que se apruebe explícitamente una integración o migración.
+
+Los requisitos específicos de cada aplicación pertenecen a:
+
+- el contexto del milestone correspondiente dentro de `docs/`
+- el `README.md` propio de la aplicación
+- las reglas aplicables dentro de `.agents/rules/`
+
+No dupliques en este archivo las especificaciones de los milestones.
+
+## Documentación
+
+El README de cada aplicación debe documentar únicamente:
+
+- propósito
+- stack tecnológico
+- estructura importante
+- cómo ejecutar la aplicación
+- cómo validarla
+- notas técnicas específicas de la aplicación
+
+> _Estas instrucciones también están disponibles en [inglés](./README.md)._
