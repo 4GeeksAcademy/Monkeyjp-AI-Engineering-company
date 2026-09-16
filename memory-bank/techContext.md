@@ -13,12 +13,34 @@ Repository workflow and modification rules are defined in `AGENTS.md`.
 
 ## Current Applications
 
-- `uis/website` — static HTML, Tailwind CDN and JavaScript
-- `uis/backoffice` — static HTML, Tailwind CDN and JavaScript
+- `uis/website` — legacy static HTML, Tailwind CDN and JavaScript; pending migration
+- `uis/backoffice` — Next.js, React, TypeScript and Tailwind
 - `uis/talent-pipeline-tracker` — Next.js, React, TypeScript and Tailwind
 - `services/api` — FastAPI centralized backend
 
 Each application remains independently structured.
+
+## Frontend Direction
+
+Brasaland frontend applications are converging on:
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- App Router
+
+The migration is incremental.
+
+Do not assume that all applications have already migrated.
+
+Current migration status:
+
+- `uis/backoffice` — migrated
+- `uis/talent-pipeline-tracker` — already uses the target stack
+- `uis/website` — migration pending
+
+Applications must continue to maintain their own layouts, dependencies, routing and environment configuration.
 
 ## Backend Direction
 
@@ -50,6 +72,8 @@ Shared business logic should remain transport-independent where practical.
 ## Configuration
 
 Application-specific environment and runtime configuration belongs to the application that consumes it.
+
+Frontend applications using Next.js must use application-level environment configuration for environment-specific API URLs.
 
 Do not hardcode environment-specific URLs or secrets.
 

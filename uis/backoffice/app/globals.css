@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brasa-50: #fff7ed;
+  --color-brasa-100: #ffedd5;
+  --color-brasa-200: #fed7aa;
+  --color-brasa-300: #fdba74;
+  --color-brasa-400: #fb923c;
+  --color-brasa-500: #f97316;
+  --color-brasa-600: #ea580c;
+  --color-brasa-700: #c2410c;
+  --color-brasa-800: #9a3412;
+  --color-brasa-900: #7c2d12;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+}
