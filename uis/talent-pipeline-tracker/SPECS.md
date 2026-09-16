@@ -43,11 +43,15 @@ Do not create a Brasaland backend service for this milestone.
 
 ### Stage values
 
-- `pending`
-- `review`
-- `personal_interview`
-- `technical_interview`
-- `offer_presented`
+| API value             | UI label            |
+| --------------------- | ------------------- |
+| `pending`             | Pending review      |
+| `review`              | Under review        |
+| `personal_interview`  | Personal interview  |
+| `technical_interview` | Technical interview |
+| `offer_presented`     | Offer presented     |
+
+> Raw API values must never be visible in the interface. Always use the labels in this table.
 
 ### Candidate fields
 

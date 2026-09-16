@@ -77,9 +77,9 @@ For functional changes, also verify the affected candidate workflow in the brows
 
 ## Related Documentation
 
-Company-wide context:
+Milestone 3 context:
 
-`CONTEXT.md`
+`docs/talent-pipeline/CONTEXT-brasaland.md`
 
 Development rules:
 
