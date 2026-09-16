@@ -59,3 +59,5 @@ Milestone 6 — Brasaland Incident Analysis
 - Incident Analysis Phase 1
 - Incident Analysis Phase 2 backend
 - Incident Analysis backoffice integration
+
+- Milestone 2 was realigned with the official context and now includes the exact domain models for menu items, sales, locations, waste, and country metrics; collection and search utilities; financial calculations; performance scoring; aggregations/reports; and business validations. The legacy Brasa Points-based implementation was removed, and the package typecheck and build pass.
