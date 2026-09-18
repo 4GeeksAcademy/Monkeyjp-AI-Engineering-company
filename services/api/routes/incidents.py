@@ -2,14 +2,20 @@
 import csv
 import io
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile, Depends
 from fastapi.responses import StreamingResponse
 
 from models.incidents import AnalysisSummary
 from repositories import incidents as repository
 from services import incidents as service
 
-router = APIRouter(prefix="/api/incidents", tags=["incidents"])
+from routes.auth import get_current_user
+
+router = APIRouter(
+    prefix="/api/incidents",
+    tags=["incidents"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.post("/analyze", response_model=AnalysisSummary)
