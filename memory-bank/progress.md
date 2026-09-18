@@ -11,6 +11,8 @@ Milestone 6 — Brasaland Incident Analysis
 - Incident analysis CLI implemented in `scripts/analyze.py`.
 - Shared incident validation and aggregation logic implemented in `packages/incident_analysis/`.
 - FastAPI incident endpoints implemented in `services/api`.
+- Backend API reorganized into `models/`, `routes/`, `services/`, and `repositories/` layers.
+- Python dependency management migrated from `requirements.txt` to `uv` using `pyproject.toml` and `uv.lock`.
 - Backoffice incident-analysis UI integrated with the API.
 - Backoffice migrated from static HTML/JavaScript to Next.js, React, TypeScript and Tailwind CSS.
 - Backoffice API configuration moved to `NEXT_PUBLIC_API_URL`.
@@ -37,7 +39,8 @@ Milestone 6 — Brasaland Incident Analysis
 ## Active Architectural Decisions
 
 - Central backend: `services/api` using FastAPI.
-- Backend structure follows the Layered Modular Monolith direction.
+- Backend structure follows a lightweight layered architecture using `models/`, `routes/`, `services/`, and `repositories/`.
+- Python backend dependencies are managed with `uv`; `pyproject.toml` defines project dependencies and `uv.lock` pins resolved versions.
 - Incident business logic remains in `packages/incident_analysis` and is shared by CLI and API.
 - Explicit milestone API contracts take precedence over proposed future route conventions.
 - Incident result persistence remains intentionally in-memory for this milestone.

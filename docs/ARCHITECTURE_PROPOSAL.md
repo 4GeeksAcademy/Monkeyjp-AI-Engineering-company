@@ -66,60 +66,80 @@ This decision aligns strictly with repository guidelines in [services/README.md]
 
 ## 3. Proposed Backend Structure
 
-To structure the backend application inside the [services/](services/) directory, organizing it under a directory such as `services/api/` is proposed as a naming convention.
+The backend is centralized under `services/api/` and organized using a lightweight layered structure.
 
-### 3.1. Proposed Directory Tree (Conceptual)
+The goal is to keep HTTP transport, business logic, data access, and validation models clearly separated without introducing unnecessary architectural complexity.
+
+### 3.1. Proposed Directory Tree
 
 ```text
 services/
-└── api/                              # Proposed name for the centralized API service
+└── api/
     ├── README.md                     # Technical documentation and run instructions
-    ├── requirements.txt              # Backend dependencies (FastAPI, Uvicorn, etc.)
-    └── app/
+    ├── main.py                       # FastAPI application entry point
+    ├── pyproject.toml                # Python project and dependency definition
+    ├── uv.lock                       # Locked Python dependency versions
+    │
+    ├── models/                       # Pydantic request/response models
+    │   ├── __init__.py
+    │   ├── incidents.py
+    │   └── suppliers.py              # Future milestone
+    │
+    ├── routes/                       # HTTP transport layer
+    │   ├── __init__.py
+    │   ├── incidents.py
+    │   └── suppliers.py              # Future milestone
+    │
+    ├── services/                     # Application and business logic
+    │   ├── __init__.py
+    │   ├── incidents.py
+    │   └── suppliers.py              # Future milestone
+    │
+    └── repositories/                 # State and persistence access
         ├── __init__.py
-        ├── main.py                   # FastAPI instantiation, CORS setup, and router registration
-        ├── core/                     # Transversal capabilities and infrastructure
-        │   ├── __init__.py
-        │   ├── config.py             # Centralized environment variable management
-        │   └── security.py           # Security utilities / headers (future)
-        ├── db/                       # Database configuration and sessions
-        │   ├── __init__.py
-        │   └── session.py
-        └── domains/                  # Modules organized by business domain
-            ├── locations/            # Locations / Restaurants domain
-            │   ├── __init__.py
-            │   ├── router.py         # FastAPI endpoints (APIRouter)
-            │   ├── schemas.py        # Pydantic models (Request / Response)
-            │   ├── service.py        # Domain business logic and rules
-            │   ├── models.py         # Persistence / ORM models
-            │   └── repository.py     # Data access and queries
-            ├── loyalty/              # Brasa Points / Loyalty domain
-            │   ├── __init__.py
-            │   ├── router.py
-            │   ├── schemas.py
-            │   ├── service.py
-            │   ├── models.py
-            │   └── repository.py
-            └── talent/               # People & Talent domain (candidates and hiring)
-                ├── __init__.py
-                ├── router.py
-                ├── schemas.py
-                ├── service.py
-                ├── models.py
-                └── repository.py
+        ├── incidents.py
+        └── suppliers.py              # Future milestone
 ```
 
 ### 3.2. Purpose and Responsibility of Each Level
 
-- **`app/main.py`:** Application entry point. Configures the FastAPI lifecycle, registers transversal middleware (such as CORS), and mounts versioned routers for each domain.
-- **`app/core/`:** Holds transversal configurations that do not belong to a specific business domain, such as environment variable loading and global utilities.
-- **`app/db/`:** Centralizes database connection setup and session provision for dependency injection.
-- **`app/domains/<domain>/`:**
-  - **`router.py`:** HTTP transport layer. Defines routes, HTTP methods, status codes, input parameters, and response schemas. Contains no heavy business logic or raw database queries.
-  - **`schemas.py`:** Defines data contracts (Data Transfer Objects) using FastAPI validation schemas (Pydantic), ensuring validation and serialization of requests and responses.
-  - **`service.py`:** Business layer. Implements Brasaland operational rules and calculations (e.g., points accrual validation, age policies, status transitions).
-  - **`models.py`:** Defines database table or entity structures.
-  - **`repository.py`:** Data access layer. Encapsulates persistence queries and operations, isolating business logic from the specific database engine.
+- **`main.py`:** FastAPI application entry point. Configures middleware, CORS, application-level settings, and router registration.
+- **`models/`:** Defines request and response contracts using Pydantic. Models contain validation and serialization concerns, not business logic.
+- **`routes/`:** HTTP transport layer. Defines endpoints, HTTP methods, status codes, request handling, and response models. Routes should remain thin and delegate application logic to services.
+- **`services/`:** Application and business logic layer. Coordinates use cases, applies domain rules, and delegates persistence or state access to repositories when required.
+- **`repositories/`:** Encapsulates state and persistence access. This layer isolates services from storage details such as in-memory state, TinyDB, or future persistence mechanisms.
+
+Not every feature is required to use every layer. Layers should only be introduced when they provide a concrete responsibility.
+
+For example:
+
+- Incident analysis reuses shared logic from `packages/incident_analysis`.
+- Supplier management is expected to use the repository layer for TinyDB persistence.
+
+### 3.3. Dependency Management
+
+Python dependencies for the backend are managed with `uv`.
+
+Project dependencies are declared in:
+
+`services/api/pyproject.toml`
+
+Resolved dependency versions are committed in:
+
+`services/api/uv.lock`
+
+The backend environment is synchronized with:
+
+```bash
+cd services/api
+uv sync
+```
+
+The development server is started with:
+
+```bash
+uv run uvicorn main:app --reload
+```
 
 ---
 

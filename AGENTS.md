@@ -268,9 +268,17 @@ Server-side functionality belongs under:
 
 `services/`
 
+The centralized Brasaland FastAPI backend lives in:
+
+`services/api/`
+
+When modifying `services/api/`, follow:
+
+`.agents/rules/backend-api.md`
+
 Do not create backend services for functionality that can reasonably remain frontend-only during the current milestone.
 
-When working on one backend domain, inspect only that domain, its direct shared dependencies, and relevant configuration unless broader architecture work is required.
+When working on one backend feature, inspect only that feature, its direct shared dependencies, and relevant configuration unless broader architecture work is required.
 
 ## Shared Packages
 
