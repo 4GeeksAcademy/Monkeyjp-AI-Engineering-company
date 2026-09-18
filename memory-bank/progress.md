@@ -2,7 +2,7 @@
 
 ## Current Milestone
 
-Milestone 6 — Brasaland Incident Analysis
+Milestone 6 — Lightweight Storage API · Supplier Directory
 
 ## Current Status
 
@@ -19,6 +19,14 @@ Milestone 6 — Brasaland Incident Analysis
 - `.env.local` is used for local or Codespaces-specific values and `.env.example` documents the required configuration.
 - CSV upload, analysis rendering and CSV export verified end-to-end.
 - Provided 100-row fixture produces the expected 96 valid / 4 invalid result and satisfaction average of 3.46.
+- Supplier Directory backend implemented in `services/api` using FastAPI, TinyDB and Pydantic.
+- Supplier API supports create, list, detail, rate update, status update, delete, country filtering and category filtering.
+- Supplier seeder loads the 15 Brasaland suppliers from the milestone context and is idempotent.
+- Supplier rate changes update `updated_at` for audit traceability.
+- Backoffice Supplier Directory implemented in `uis/backoffice`.
+- Supplier UI supports country/category filtering, supplier creation, rate updates and active/suspended status changes.
+- Supplier list uses responsive cards on mobile and a table on larger screens.
+- Frontend production build passes with `/suppliers` included.
 
 ### Current Integration Notes
 
@@ -27,6 +35,9 @@ Milestone 6 — Brasaland Incident Analysis
 - Persistence is outside the current milestone scope.
 - Browser access from GitHub Codespaces requires the forwarded API port to be accessible to the frontend.
 - The backoffice reads its API base URL from `NEXT_PUBLIC_API_URL`.
+- Supplier data is persisted locally with TinyDB under `services/api/data/`.
+- TinyDB document IDs are exposed as supplier IDs through the API.
+- Supplier runtime data files are ignored by Git and recreated through the seeder.
 
 ## Open Tasks
 
@@ -66,5 +77,6 @@ Milestone 6 — Brasaland Incident Analysis
 - Incident Analysis Phase 1
 - Incident Analysis Phase 2 backend
 - Incident Analysis backoffice integration
+- Supplier Directory — Lightweight Storage API
 
 - Milestone 2 was realigned with the official context and now includes the exact domain models for menu items, sales, locations, waste, and country metrics; collection and search utilities; financial calculations; performance scoring; aggregations/reports; and business validations. The legacy Brasa Points-based implementation was removed, and the package typecheck and build pass.

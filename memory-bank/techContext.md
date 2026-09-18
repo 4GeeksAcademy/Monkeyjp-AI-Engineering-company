@@ -50,6 +50,13 @@ Brasaland uses a centralized FastAPI backend under:
 
 The architectural direction is a Layered Modular Monolith.
 
+Current backend tooling and storage:
+
+- FastAPI is used for the centralized API.
+- Backend features follow the `models/`, `routes/`, `services/`, and `repositories/` structure.
+- TinyDB is currently used as lightweight persistent storage for the Supplier Directory milestone.
+- Python backend dependencies are managed with `uv`.
+
 Detailed architectural decisions live in:
 
 `docs/ARCHITECTURE_PROPOSAL.md`
