@@ -7,6 +7,6 @@ corepack prepare pnpm@latest --activate || true
 
 python -m pip install --upgrade pip uv
 
-uv sync
+uv sync --project services/api
 
 echo "Devcontainer setup complete."

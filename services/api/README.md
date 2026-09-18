@@ -2,32 +2,48 @@
 
 Centralized Brasaland backend built with FastAPI.
 
-The service currently exposes the Incident Analysis domain.
+The service currently exposes the Incident Analysis functionality and is structured to support additional backend features such as Suppliers.
 
 ## Technology
 
-- Python
+- Python 3.12+
 - FastAPI
 - Uvicorn
+- Pydantic
+- uv
 
-Dependencies are defined in:
+Python dependencies are managed with `uv` and defined in:
 
-`requirements.txt`
+`pyproject.toml`
+
+Resolved dependency versions are locked in:
+
+`uv.lock`
 
 ## Structure
 
 ```text
-app/
+services/api/
 ├── main.py
-└── domains/
-    └── incidents/
-        ├── router.py
-        ├── schemas.py
-        ├── service.py
-        └── repository.py
+├── models/
+│   └── incidents.py
+├── routes/
+│   └── incidents.py
+├── services/
+│   └── incidents.py
+└── repositories/
+    └── incidents.py
 ```
 
-The incidents domain reuses shared business logic from:
+Each layer has a clear responsibility:
+
+- `main.py` — FastAPI application entry point and global configuration
+- `models/` — Pydantic request and response models
+- `routes/` — HTTP endpoints and transport-layer concerns
+- `services/` — application and business orchestration logic
+- `repositories/` — state and persistence access
+
+The incidents service reuses shared business logic from:
 
 `packages/incident_analysis`
 
@@ -37,9 +53,11 @@ Do not duplicate incident validation, aggregation, or export logic inside the AP
 
 From the repository root:
 
-    cd services/api
-    pip install -r requirements.txt
-    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```bash
+cd services/api
+uv sync
+uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
 The API documentation is available through FastAPI's `/docs` endpoint while the service is running.
 
@@ -71,7 +89,7 @@ Returns `404` when no analysis is available in the current process.
 
 ## State
 
-The latest analysis is stored in memory.
+The latest incident analysis is currently stored in memory through the repository layer.
 
 This means:
 
@@ -79,11 +97,13 @@ This means:
 - state is process-local
 - multiple workers do not share the same result
 
-Persistent storage is currently outside the milestone scope.
+Persistent storage for incident analysis is currently outside the milestone scope.
+
+Future backend features may use persistent storage through the repository layer.
 
 ## CORS
 
-CORS is configured for the frontend development environments required by the backoffice integration.
+CORS is configured for the frontend development environments required by the Brasaland UIs.
 
 Do not use unrestricted production origins.
 

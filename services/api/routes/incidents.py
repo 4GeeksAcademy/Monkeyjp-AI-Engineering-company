@@ -5,8 +5,9 @@ import io
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
-from . import repository, service
-from .schemas import AnalysisSummary
+from models.incidents import AnalysisSummary
+from repositories import incidents as repository
+from services import incidents as service
 
 router = APIRouter(prefix="/api/incidents", tags=["incidents"])
 
