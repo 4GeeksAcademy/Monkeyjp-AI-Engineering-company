@@ -54,7 +54,13 @@ Current backend tooling and storage:
 
 - FastAPI is used for the centralized API.
 - Backend features follow the `models/`, `routes/`, `services/`, and `repositories/` structure.
-- TinyDB is currently used as lightweight persistent storage for the Supplier Directory milestone.
+- TinyDB is currently used as lightweight persistent storage for the Supplier Directory and authentication User/Profile data.
+- Incident Analysis currently keeps its latest result in process-local memory.
+- Authentication uses `OAuth2PasswordBearer`, signed JWT bearer tokens with `python-jose`, and bcrypt password hashing.
+- `User` stores credentials and account state; display name and contact data live in the one-to-one `Profile`.
+- JWT tokens use the TinyDB user ID as the `sub` claim.
+- Protected Supplier and Incident Analysis routes resolve authentication through the reusable `get_current_user` dependency.
+- Authentication secrets are provided through environment configuration. Local `.env` files are not committed; `.env.example` documents required variables.
 - Python backend dependencies are managed with `uv`.
 
 Detailed architectural decisions live in:
@@ -82,7 +88,14 @@ Application-specific environment and runtime configuration belongs to the applic
 
 Frontend applications using Next.js must use application-level environment configuration for environment-specific API URLs.
 
+The backend API uses environment configuration for authentication settings, including:
+
+- `AUTH_SECRET_KEY`
+- `ACCESS_TOKEN_EXPIRE_MINUTES`
+
 Do not hardcode environment-specific URLs or secrets.
+
+Do not commit local `.env` files.
 
 ## Technical Source Priority
 

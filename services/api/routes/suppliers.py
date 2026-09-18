@@ -1,5 +1,6 @@
 """HTTP transport layer for the supplier directory."""
-from fastapi import APIRouter, HTTPException, Query, status
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from models.suppliers import (
     Supplier,
@@ -9,10 +10,15 @@ from models.suppliers import (
     SupplierRateUpdate,
     SupplierStatusUpdate,
 )
+from routes.auth import get_current_user
 from services import suppliers as service
 
 
-router = APIRouter(prefix="/suppliers", tags=["suppliers"])
+router = APIRouter(
+    prefix="/suppliers",
+    tags=["suppliers"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 def _not_found(supplier_id: str) -> HTTPException:
@@ -22,7 +28,11 @@ def _not_found(supplier_id: str) -> HTTPException:
     )
 
 
-@router.post("", response_model=Supplier, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=Supplier,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_supplier(payload: SupplierCreate) -> Supplier:
     return service.create_supplier(payload)
 
@@ -32,7 +42,10 @@ def list_suppliers(
     country: SupplierCountry | None = None,
     category: SupplierCategory | None = Query(default=None),
 ) -> list[Supplier]:
-    return service.list_suppliers(country=country, category=category)
+    return service.list_suppliers(
+        country=country,
+        category=category,
+    )
 
 
 @router.get("/{supplier_id}", response_model=Supplier)
@@ -49,7 +62,10 @@ def update_supplier_rate(
     payload: SupplierRateUpdate,
 ) -> Supplier:
     try:
-        return service.update_supplier_rate(supplier_id, payload.rate_per_unit)
+        return service.update_supplier_rate(
+            supplier_id,
+            payload.rate_per_unit,
+        )
     except service.SupplierNotFoundError as exc:
         raise _not_found(supplier_id) from exc
 
@@ -60,12 +76,18 @@ def update_supplier_status(
     payload: SupplierStatusUpdate,
 ) -> Supplier:
     try:
-        return service.update_supplier_status(supplier_id, payload.status)
+        return service.update_supplier_status(
+            supplier_id,
+            payload.status,
+        )
     except service.SupplierNotFoundError as exc:
         raise _not_found(supplier_id) from exc
 
 
-@router.delete("/{supplier_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{supplier_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
 def delete_supplier(supplier_id: str) -> None:
     try:
         service.delete_supplier(supplier_id)
