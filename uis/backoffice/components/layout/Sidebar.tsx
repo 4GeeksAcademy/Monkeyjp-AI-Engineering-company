@@ -9,6 +9,7 @@ const navigation = [
   { label: "Ubicaciones", href: "/locations" },
   { label: "Brasa Points", href: "/brasa-points" },
   { label: "Incidentes", href: "/incidents" },
+  { label: "Proveedores", href: "/suppliers" },
 ];
 
 export default function Sidebar() {
@@ -51,8 +52,7 @@ export default function Sidebar() {
         <ul className="space-y-2">
           {navigation.map((item) => {
             const isActive =
-              pathname === item.href ||
-              pathname.startsWith(`${item.href}/`);
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <li key={item.href}>

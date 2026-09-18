@@ -16,6 +16,7 @@ if str(REPO_ROOT) not in sys.path:
 
 
 from routes.incidents import router as incidents_router
+from routes.suppliers import router as suppliers_router
 
 
 app = FastAPI(title="Brasaland API")
@@ -32,9 +33,10 @@ app.add_middleware(
     ],
     allow_origin_regex=r"https://.*\.app\.github\.dev",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
 
 app.include_router(incidents_router)
+app.include_router(suppliers_router)
